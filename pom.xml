@@ -17,6 +17,7 @@
 
     <modules>
         <module>multirts-core</module>
+        <module>multirts-maven-extension</module>
         <module>multirts-maven-plugin</module>
     </modules>
 

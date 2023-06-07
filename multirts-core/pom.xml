@@ -16,7 +16,11 @@
     <packaging>jar</packaging>
 
     <properties>
+        <eclipse-jgit.version>5.11.0.202103091610-r</eclipse-jgit.version>
+        <javaparser.version>3.20.2</javaparser.version>
+        <jtec.version>0.0.3</jtec.version>
         <junit5.version>5.7.0</junit5.version>
+        <maven-core.version>3.8.5</maven-core.version>
         <mockito.version>4.5.1</mockito.version>
     </properties>
 
@@ -24,22 +28,22 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>jtec-core</artifactId>
-            <version>0.0.3</version>
+            <version>${jtec.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
-            <version>5.11.0.202103091610-r</version>
+            <version>${eclipse-jgit.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-core</artifactId>
-            <version>3.8.5</version>
+            <version>${maven-core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.javaparser</groupId>
             <artifactId>javaparser-core</artifactId>
-            <version>3.20.2</version>
+            <version>${javaparser.version}</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
