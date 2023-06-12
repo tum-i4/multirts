@@ -39,13 +39,15 @@ public class FileLevelTestSelection extends AbstractChangeBasedTestSelection {
         // Check if test suite affected by any affected file.
         // We check if an opened file contains the affected filename.
         for (final String affectedFile : affectedPair.affectedFiles) {
+            // Check for full string match.
+            if (testSuite.getOpenedFiles().contains(affectedFile)) {
+                return Optional.of(new SelectedTestSuite(SelectionCause.AFFECTED.setReason(affectedFile), testSuite));
+            }
+            // Check for substring match.
             for (final String openedFile : testSuite.getOpenedFiles()) {
                 if (openedFile.contains(affectedFile)) {
                     return Optional.of(new SelectedTestSuite(SelectionCause.AFFECTED.setReason(affectedFile), testSuite));
                 }
-            }
-            if (testSuite.getOpenedFiles().contains(affectedFile)) {
-                return Optional.of(new SelectedTestSuite(SelectionCause.AFFECTED.setReason(affectedFile), testSuite));
             }
         }
         // Check if test suite affected by any affected coverage entity.

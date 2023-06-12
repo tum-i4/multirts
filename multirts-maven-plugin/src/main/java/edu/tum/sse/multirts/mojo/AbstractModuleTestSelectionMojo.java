@@ -10,11 +10,23 @@ import java.io.File;
  */
 public abstract class AbstractModuleTestSelectionMojo extends AbstractMultiRTSMojo {
 
+    final static String MODULE_FILE = "modules.txt";
+
     /**
      * Git repository root.
      */
     @Parameter(property = "multirts.git", defaultValue = "${basedir}")
     File gitRepositoryRoot;
 
-    final static String MODULE_FILE = "modules.txt";
+    /**
+     * The target revision (commit identifier or branch name) into which the changes are to be integrated.
+     */
+    @Parameter(property = "multirts.targetRevision", defaultValue = "main")
+    String targetRevision;
+
+    /**
+     * The source revision (commit identifier or branch name) where the changes are currently.
+     */
+    @Parameter(property = "multirts.sourceRevision", defaultValue = "HEAD")
+    String sourceRevision;
 }

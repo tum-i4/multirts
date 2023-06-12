@@ -23,8 +23,9 @@ $ mvn clean install
 ```
 
 This will build the code for all MultiRTS projects, run all tests, and install the JARs to your local Maven repository.
-Note: In order to successfully build MultiRTS, you'll need to have the appropriate [JTeC](https://github.com/tum-i4/JTeC) version in your local Maven
-repository.
+
+*Note: In order to successfully build MultiRTS, you'll need to have the appropriate [JTeC](https://github.com/tum-i4/JTeC) version in your local Maven
+repository.*
 
 ## Usage
 
