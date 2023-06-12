@@ -30,10 +30,12 @@ public class FileLevelTestSelection extends AbstractChangeBasedTestSelection {
      * Here, the source file "/path/to/foo.cpp" is part of the two DLLs "lib_foo.dll" and "lib_bar.dll".
      */
     private final Map<String, Set<String>> additionalFileMapping;
+    private final Set<SelectedTestSuite> preSelectedTestSuites;
 
-    public FileLevelTestSelection(final TestReport testReport, final GitClient gitClient, final String targetRevision, final Map<String, Set<String>> additionalFileMapping) {
+    public FileLevelTestSelection(final TestReport testReport, final GitClient gitClient, final String targetRevision, final Map<String, Set<String>> additionalFileMapping, Set<SelectedTestSuite> preSelectedTestSuites) {
         super(testReport, gitClient, targetRevision);
         this.additionalFileMapping = additionalFileMapping;
+        this.preSelectedTestSuites = preSelectedTestSuites;
     }
 
     private Optional<SelectedTestSuite> checkTestSuiteAffected(final TestSuite testSuite, final AffectedInfo affectedInfo) {
@@ -67,33 +69,52 @@ public class FileLevelTestSelection extends AbstractChangeBasedTestSelection {
     }
 
     private TestSelectionResult computeTestSelection(final AffectedInfo affectedInfo) {
-        final List<TestSuite> allTestSuites = testReport.getTestSuites();
-        final List<SelectedTestSuite> selectedTestSuites = new ArrayList<>();
-        final Set<String> selectedTestSuiteNames = new HashSet<>(affectedInfo.changedTestSuiteNames);
+        List<TestSuite> allTestSuites = testReport.getTestSuites();
+        List<SelectedTestSuite> selectedTestSuites = new ArrayList<>();
+        Set<String> selectedTestSuiteNames = new HashSet<>();
+        // Add all pre-selected tests to prevent any effort for checking if they are affected.
+        for (final SelectedTestSuite selectedTestSuite : preSelectedTestSuites) {
+            selectedTestSuites.add(selectedTestSuite);
+            selectedTestSuiteNames.add(selectedTestSuite.getTestSuite().getTestId());
+        }
+        // Add all changed/added tests.
+        for (final String testSuiteName: affectedInfo.changedTestSuiteNames) {
+            if (selectedTestSuiteNames.contains(testSuiteName)) {
+                continue;
+            }
+            TestSuite testSuite = new TestSuite();
+            testSuite.setTestId(testSuiteName);
+            selectedTestSuites.add(new SelectedTestSuite(SelectionCause.ADDED_CHANGED, testSuite));
+            selectedTestSuiteNames.add(testSuiteName);
+        }
+        // Add all other affected tests.
         for (final TestSuite testSuite : allTestSuites) {
+            if (selectedTestSuiteNames.contains(testSuite.getTestId())) {
+                continue;
+            }
             Optional<SelectedTestSuite> maybeSelectedTestSuite = checkTestSuiteAffected(testSuite, affectedInfo);
             maybeSelectedTestSuite.ifPresent(ts -> {
                 selectedTestSuites.add(ts);
                 selectedTestSuiteNames.add(ts.getTestSuite().getTestId());
             });
         }
-        final List<TestSuite> excludedTestSuites = allTestSuites.stream().filter(ts -> !selectedTestSuiteNames.contains(ts.getTestId())).collect(Collectors.toList());
+        List<TestSuite> excludedTestSuites = allTestSuites.stream().filter(ts -> !selectedTestSuiteNames.contains(ts.getTestId())).collect(Collectors.toList());
         return new TestSelectionResult(selectedTestSuites, excludedTestSuites);
     }
 
-    private AffectedInfo analyzeChangeSetItem(final ChangeSetItem item) throws IOException, JavaSourceCodeParser.JavaParserException {
+    private AffectedInfo analyzeChangeSetItem(final ChangeSetItem item) throws IOException {
         AffectedInfo affectedInfo = new AffectedInfo();
         if (isJavaFile(item.getPath())) {
             // In case the file existed before, we add all previously existing class names.
             if (item.getChangeType() != ChangeType.ADDED) {
-                final String oldContent = gitClient.getFileContentAtRevision(item.getPath(), targetRevision);
-                final Set<String> allTypeNames = JavaSourceCodeParser.getAllFullyQualifiedTypeNames(oldContent);
+                String oldContent = gitClient.getFileContentAtRevision(item.getPath(), targetRevision);
+                Set<String> allTypeNames = JavaSourceCodeParser.getAllFullyQualifiedTypeNames(oldContent);
                 affectedInfo.affectedCoverageEntities.addAll(allTypeNames);
             }
             // In case the file does still exist, we need to add all currently existing class names.
             if (item.getChangeType() != ChangeType.DELETED) {
-                final Path filePath = gitClient.getRoot().resolve(item.getPath());
-                final Set<String> allTypeNames = JavaSourceCodeParser.getAllFullyQualifiedTypeNames(filePath);
+                Path filePath = gitClient.getRoot().resolve(item.getPath());
+                Set<String> allTypeNames = JavaSourceCodeParser.getAllFullyQualifiedTypeNames(filePath);
                 affectedInfo.affectedCoverageEntities.addAll(allTypeNames);
                 // In case of changed/added test suites, we add them here explicitly.
                 if (isTestFile(filePath)) {

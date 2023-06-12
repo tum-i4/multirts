@@ -3,7 +3,7 @@ package edu.tum.sse.multirts.mojo;
 import edu.tum.sse.jtec.reporting.TestReport;
 import edu.tum.sse.jtec.reporting.TestSuite;
 import edu.tum.sse.jtec.util.JSONUtils;
-import edu.tum.sse.multirts.rts.FileLevelTestSelection;
+import edu.tum.sse.multirts.rts.BuildSystemAwareTestSelectionMediator;
 import edu.tum.sse.multirts.rts.TestSelectionResult;
 import edu.tum.sse.multirts.util.CollectionUtils;
 import edu.tum.sse.multirts.vcs.GitClient;
@@ -16,12 +16,11 @@ import org.apache.maven.plugins.annotations.Parameter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static edu.tum.sse.jtec.util.IOUtils.writeToFile;
@@ -34,6 +33,7 @@ import static edu.tum.sse.multirts.rts.SelectedTestSuite.toTestSuites;
 public class TestSelectionMojo extends AbstractModuleTestSelectionMojo {
 
     private static final String CSV_SEPARATOR = ";";
+    private static final String TESTS_INCLUDED_FILE = "included.txt";
 
     /**
      * Additional file mappings in CSV format (e.g. DLL-source-mapping).
@@ -87,18 +87,26 @@ public class TestSelectionMojo extends AbstractModuleTestSelectionMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             if (session.getCurrentProject().isExecutionRoot()) {
-                log("test-selection called");
-                final GitClient gitClient = new GitClient(gitRepositoryRoot.toPath());
-                final TestReport testReport = readReport();
-                final Map<String, Set<String>> fileMapping = readFileMapping();
-                final TestSelectionResult testSelectionResult = new FileLevelTestSelection(testReport, gitClient, targetRevision, fileMapping)
-                        .execute(gitClient.getDiff(sourceRevision, targetRevision));
-                final List<TestSuite> selectedTestSuites = toTestSuites(testSelectionResult.getSelectedTestSuites());
-                StringBuilder builder = new StringBuilder();
-                Path selectedModulesFile = outputDirectory.toPath().resolve("modules").resolve(MODULE_FILE);
-                writeToFile(selectedModulesFile, builder.toString(), false, StandardOpenOption.TRUNCATE_EXISTING);
+                GitClient gitClient = new GitClient(gitRepositoryRoot.toPath());
+                TestReport testReport = readReport();
+                Map<String, Set<String>> fileMapping = readFileMapping();
+                BuildSystemAwareTestSelectionMediator mediator = new BuildSystemAwareTestSelectionMediator(
+                        session,
+                        gitClient,
+                        testReport,
+                        sourceRevision,
+                        targetRevision,
+                        fileMapping
+                );
+                // Select tests.
+                TestSelectionResult testSelectionResult = mediator.executeTestSelection();
+                String selectedTestSuites = toTestSuites(testSelectionResult.getSelectedTestSuites()).stream().map(TestSuite::getTestId).collect(Collectors.joining("\n"));
+                writeToFile(outputDirectory.toPath().resolve(label).resolve(TESTS_INCLUDED_FILE), selectedTestSuites, false, StandardOpenOption.TRUNCATE_EXISTING);
+                // Select modules for tests.
+                Set<String> selectedModules = mediator.getModulesForTests(testSelectionResult.getSelectedTestSuites());
+                writeToFile(outputDirectory.toPath().resolve(label).resolve(MODULE_FILE), String.join("\n", selectedModules), false, StandardOpenOption.TRUNCATE_EXISTING);
             }
-        } catch (final Exception exception) {
+        } catch (Exception exception) {
             getLog().error("Failed to run MultiRTS module selection in project " + project.getName());
             exception.printStackTrace();
             throw new MojoFailureException(exception.getMessage());

@@ -35,7 +35,7 @@ class JavaSourceCodeParserTest {
     }
 
     @Test
-    void shouldFindFullyQualifiedName() throws IOException, URISyntaxException, JavaSourceCodeParser.JavaParserException {
+    void shouldFindFullyQualifiedName() throws IOException, URISyntaxException {
         final Path javaFile = Paths.get(Objects.requireNonNull(getClass().getClassLoader().getResource("Sample.java")).toURI());
         final String expected = "foo.Sample";
 

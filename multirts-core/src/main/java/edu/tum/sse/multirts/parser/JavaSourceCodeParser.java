@@ -9,6 +9,7 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 import edu.tum.sse.jtec.util.IOUtils;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
@@ -20,14 +21,21 @@ public class JavaSourceCodeParser {
 
     // Regex based on Maven Surefire:
     // https://maven.apache.org/surefire/maven-surefire-plugin/examples/inclusion-exclusion.html
-    public static String TEST_FILE_PATTERN = ".*Test.*.java";
+    public static String TEST_FILE_PATTERN = ".*test.*.java";
+
+    public static Set<Path> findAllJavaTestFiles(Path root) throws IOException {
+        return Files.find(root,
+                Integer.MAX_VALUE,
+                (path, basicFileAttributes) -> isJavaFile(path) && isTestFile(path)
+        ).collect(Collectors.toSet());
+    }
 
     public static boolean isJavaFile(final Path path) {
         return path.toString().toLowerCase().endsWith(".java");
     }
 
     public static boolean isTestFile(final Path path) {
-        return path.toString().matches(TEST_FILE_PATTERN);
+        return path.toFile().getName().toLowerCase().matches(TEST_FILE_PATTERN);
     }
 
     public static Set<String> getAllFullyQualifiedTypeNames(final String code) {
@@ -56,14 +64,11 @@ public class JavaSourceCodeParser {
         return getAllFullyQualifiedTypeNames(IOUtils.readFromFile(path));
     }
 
-    public static String getFullyQualifiedTypeName(Path path) throws IOException, JavaParserException {
+    public static String getFullyQualifiedTypeName(Path path) throws IOException {
         CompilationUnit compilationUnit = StaticJavaParser.parse(path);
         if (!compilationUnit.getPrimaryTypeName().isPresent() || !compilationUnit.getPackageDeclaration().isPresent()) {
-            throw new JavaParserException();
+            throw new RuntimeException("Could not determine package and class name for file " + path.toString());
         }
         return compilationUnit.getPackageDeclaration().get().getName() + "." + compilationUnit.getPrimaryTypeName().get();
-    }
-
-    public static class JavaParserException extends Exception {
     }
 }

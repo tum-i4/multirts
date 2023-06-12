@@ -5,6 +5,7 @@ import edu.tum.sse.multirts.vcs.ChangeSetItem;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,7 +24,7 @@ public class NoopTestSelection implements TestSelectionStrategy {
 
     @Override
     public TestSelectionResult execute(final Set<ChangeSetItem> changeSet) {
-        final List<SelectedTestSuite> selectedTestSuites = testReport.getTestSuites()
+        List<SelectedTestSuite> selectedTestSuites = testReport.getTestSuites()
                 .stream()
                 .map(testSuite -> new SelectedTestSuite(SELECTION_CAUSE, testSuite))
                 .collect(Collectors.toList());

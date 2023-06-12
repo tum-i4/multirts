@@ -32,7 +32,7 @@ public class ModuleSelectionMojo extends AbstractModuleTestSelectionMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             if (session.getCurrentProject().isExecutionRoot()) {
-                log("module-selection called");
+                label = "modules";
                 StringBuilder builder = new StringBuilder();
                 Path selectedModulesFile = outputDirectory.toPath().resolve("modules").resolve(MODULE_FILE);
                 writeToFile(selectedModulesFile, builder.toString(), false, StandardOpenOption.TRUNCATE_EXISTING);
