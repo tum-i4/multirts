@@ -18,8 +18,16 @@ import java.util.stream.Stream;
 
 public class JavaSourceCodeParser {
 
+    // Regex based on Maven Surefire:
+    // https://maven.apache.org/surefire/maven-surefire-plugin/examples/inclusion-exclusion.html
+    public static String TEST_FILE_PATTERN = ".*Test.*.java";
+
     public static boolean isJavaFile(final Path path) {
         return path.toString().toLowerCase().endsWith(".java");
+    }
+
+    public static boolean isTestFile(final Path path) {
+        return path.toString().matches(TEST_FILE_PATTERN);
     }
 
     public static Set<String> getAllFullyQualifiedTypeNames(final String code) {
@@ -46,5 +54,16 @@ public class JavaSourceCodeParser {
 
     public static Set<String> getAllFullyQualifiedTypeNames(final Path path) throws IOException {
         return getAllFullyQualifiedTypeNames(IOUtils.readFromFile(path));
+    }
+
+    public static String getFullyQualifiedTypeName(Path path) throws IOException, JavaParserException {
+        CompilationUnit compilationUnit = StaticJavaParser.parse(path);
+        if (!compilationUnit.getPrimaryTypeName().isPresent() || !compilationUnit.getPackageDeclaration().isPresent()) {
+            throw new JavaParserException();
+        }
+        return compilationUnit.getPackageDeclaration().get().getName() + "." + compilationUnit.getPrimaryTypeName().get();
+    }
+
+    public static class JavaParserException extends Exception {
     }
 }

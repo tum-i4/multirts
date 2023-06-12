@@ -3,6 +3,7 @@ package foo;
 @interface Anno {
 }
 
+class Bar {}
 @Anno
 public class Sample {
     void foo() {

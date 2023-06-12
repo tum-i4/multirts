@@ -24,6 +24,29 @@ class JavaSourceCodeParserTest {
     }
 
     @Test
+    void shouldDetectTestFiles() {
+        assertTrue(JavaSourceCodeParser.isTestFile(Paths.get("/some/FooTest.java")));
+        assertTrue(JavaSourceCodeParser.isTestFile(Paths.get("/some/TestFoo.java")));
+        assertTrue(JavaSourceCodeParser.isTestFile(Paths.get("/some/TestsFoo.java")));
+        assertTrue(JavaSourceCodeParser.isTestFile(Paths.get("/some/FooTestCase.java")));
+        assertFalse(JavaSourceCodeParser.isTestFile(Paths.get("/some/Foo.JAVA")));
+        assertFalse(JavaSourceCodeParser.isTestFile(Paths.get("/some/Bar.jav")));
+        assertFalse(JavaSourceCodeParser.isTestFile(Paths.get("/some/Bar.class")));
+    }
+
+    @Test
+    void shouldFindFullyQualifiedName() throws IOException, URISyntaxException, JavaSourceCodeParser.JavaParserException {
+        final Path javaFile = Paths.get(Objects.requireNonNull(getClass().getClassLoader().getResource("Sample.java")).toURI());
+        final String expected = "foo.Sample";
+
+        // when
+        final String actual = JavaSourceCodeParser.getFullyQualifiedTypeName(javaFile);
+
+        // then
+        assertEquals(expected, actual);
+    }
+
+    @Test
     void shouldFindAllClassInterfaceEnumTypes() {
         // given
         final String code = "package a.b.c;\n" +
@@ -46,7 +69,7 @@ class JavaSourceCodeParserTest {
     void shouldFindAllTypesFromFile() throws IOException, URISyntaxException {
         // given
         final Path javaFile = Paths.get(Objects.requireNonNull(getClass().getClassLoader().getResource("Sample.java")).toURI());
-        final Set<String> expected = Stream.of("foo.Sample.Bar", "foo.Anno", "foo.Sample.X", "foo.Sample.Y", "foo.Sample", "foo.Sample.Foo")
+        final Set<String> expected = Stream.of("foo.Sample.Bar", "foo.Anno", "foo.Sample.X", "foo.Sample.Y", "foo.Sample", "foo.Sample.Foo", "foo.Bar")
                 .collect(Collectors.toSet());
 
         // when
