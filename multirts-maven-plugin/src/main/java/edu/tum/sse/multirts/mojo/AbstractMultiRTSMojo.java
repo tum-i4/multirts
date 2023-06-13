@@ -1,5 +1,6 @@
 package edu.tum.sse.multirts.mojo;
 
+import edu.tum.sse.multirts.vcs.GitClient;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;

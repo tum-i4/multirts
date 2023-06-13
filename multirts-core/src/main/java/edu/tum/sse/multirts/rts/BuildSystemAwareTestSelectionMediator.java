@@ -59,8 +59,7 @@ public class BuildSystemAwareTestSelectionMediator {
         this.mavenSession = mavenSession;
     }
 
-    public TestSelectionResult executeTestSelection() throws IOException {
-        Set<ChangeSetItem> changeSetItems = gitClient.getDiff(sourceRevision, targetRevision);
+    public TestSelectionResult executeTestSelection(Set<ChangeSetItem> changeSetItems) throws IOException {
         Set<Path> modifiedPOMs = new HashSet<>();
         for (ChangeSetItem item : changeSetItems) {
             if (item.getChangeType() != ChangeType.DELETED) {

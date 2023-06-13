@@ -38,8 +38,8 @@ the `-Dsurefire.includesFile` option.
 
 ## Additional Parameters for Test Selection Goal
 
-| Key                              | Type             | Description                                                                                  |
-|----------------------------------|------------------|----------------------------------------------------------------------------------------------|
-| `multirts.additionalFileMapping` | `Optional[Path]` | CSV file delimited by `;` containing two columns (used for DLL-to-source-file mapping)       |
-| `multirts.includedTests`         | `String`         | Comma-separated string of additionally included tests (default: `**/PackageDependencyTest*`) |
-| `multirts.testReport`            | `Path`           | JTeC test report                                                                             |
+| Key                               | Type         | Description                                                                                  |
+|-----------------------------------|--------------|----------------------------------------------------------------------------------------------|
+| `multirts.additionalFileMappings` | `List[Path]` | CSV files delimited by `;` containing two columns (used for DLL-to-source-file mapping)      |
+| `multirts.includedTests`          | `String`     | Comma-separated string of additionally included tests (default: `**/PackageDependencyTest*`) |
+| `multirts.testReport`             | `Path`       | JTeC test report                                                                             |
