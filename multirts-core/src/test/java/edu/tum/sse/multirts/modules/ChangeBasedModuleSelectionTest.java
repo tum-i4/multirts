@@ -45,8 +45,7 @@ class ChangeBasedModuleSelectionTest {
 
         // then
         assertEquals(modules.size(), 1);
-        System.err.println("Modules: " + String.join(",", modules));
-        assertTrue(modules.containsAll(newSet("f/g/pom.xml")));
+        assertTrue(modules.containsAll(newSet(Paths.get("f/g/pom.xml").toString())));
     }
 
     @Test

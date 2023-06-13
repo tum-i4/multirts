@@ -50,7 +50,6 @@ public class ChangeBasedModuleSelection {
         Set<String> selectedModules = new HashSet<>();
         for (ChangeSetItem item : changeSet) {
             Path filePath = gitClient.getRoot().resolve(item.getPath()).toAbsolutePath();
-            System.err.println("FilePath: " + filePath);
             // Check for full build.
             for (String fullBuildPath : fullBuildPaths) {
                 if (filePath.toString().contains(fullBuildPath)) {

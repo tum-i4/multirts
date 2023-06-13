@@ -8,6 +8,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
+import java.io.File;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Set;
@@ -32,7 +33,7 @@ public class ModuleSelectionMojo extends AbstractModuleTestSelectionMojo {
     /**
      * File paths which trigger a full build.
      */
-    @Parameter(property = "multirts.fullBuild", defaultValue = "/base/", readonly = true)
+    @Parameter(property = "multirts.fullBuild", defaultValue = "/base/,\\base\\", readonly = true)
     private List<String> fullBuildPaths;
 
     @Override
@@ -55,7 +56,7 @@ public class ModuleSelectionMojo extends AbstractModuleTestSelectionMojo {
         StringBuilder builder = new StringBuilder();
         for (String module : selectedModules) {
             for (String stripDir : stripDirectories) {
-                builder.append(module.replace(stripDir + "/" + POM_XML, POM_XML));
+                builder.append(module.replace(stripDir + File.separator + POM_XML, POM_XML));
                 builder.append("\n");
             }
         }
