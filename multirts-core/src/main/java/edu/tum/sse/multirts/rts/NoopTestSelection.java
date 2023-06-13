@@ -23,7 +23,7 @@ public class NoopTestSelection implements TestSelectionStrategy {
     }
 
     @Override
-    public TestSelectionResult execute(final Set<ChangeSetItem> changeSet) {
+    public TestSelectionResult execute(final Set<ChangeSetItem> changeSet, Set<SelectedTestSuite> preSelectedTestSuites) {
         List<SelectedTestSuite> selectedTestSuites = testReport.getTestSuites()
                 .stream()
                 .map(testSuite -> new SelectedTestSuite(SELECTION_CAUSE, testSuite))

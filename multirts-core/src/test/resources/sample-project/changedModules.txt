@@ -1,2 +1,0 @@
-d/pom.xml
-e/pom.xml

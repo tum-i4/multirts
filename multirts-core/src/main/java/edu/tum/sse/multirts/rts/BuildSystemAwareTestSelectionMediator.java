@@ -4,7 +4,6 @@ import edu.tum.sse.jtec.reporting.TestReport;
 import edu.tum.sse.jtec.reporting.TestSuite;
 import edu.tum.sse.multirts.modules.ModuleSelector;
 import edu.tum.sse.multirts.parser.JavaSourceCodeParser;
-import edu.tum.sse.multirts.util.CollectionUtils;
 import edu.tum.sse.multirts.util.PathUtils;
 import edu.tum.sse.multirts.vcs.ChangeSetItem;
 import edu.tum.sse.multirts.vcs.ChangeType;
@@ -19,64 +18,46 @@ import java.util.stream.Collectors;
 
 import static edu.tum.sse.multirts.modules.MavenProjectLocationCache.POM_XML;
 import static edu.tum.sse.multirts.modules.MavenProjectLocationCache.findParentPOM;
+import static edu.tum.sse.multirts.util.CollectionUtils.newList;
 
 /**
  * Mediator class to steer the build system aware test (and test module) selection.
  */
 public class BuildSystemAwareTestSelectionMediator {
 
-    private static final List<String> COMPILE_TIME_EXTENSIONS = CollectionUtils.newList(".wsdl", ".xsd");
+    private static final List<String> COMPILE_TIME_EXTENSIONS = newList(".wsdl", ".xsd");
 
     private final MavenSession mavenSession;
-    private final GitClient gitClient;
-    private final TestReport testReport;
-    private final String sourceRevision;
-    private final String targetRevision;
-    private final Map<String, Set<String>> additionalFileMapping;
+    private final TestSelectionStrategy testSelectionStrategy;
     private final Path root;
-    private Map<String, Path> testSuiteMappingCache = null;
-
-    private Map<String, Path> getTestSuiteMapping() throws IOException {
-        if (testSuiteMappingCache == null) {
-             testSuiteMappingCache = getTestSuiteMapping(root);
-        }
-        return testSuiteMappingCache;
-    }
+    private Map<String, Path> lazyTestSuiteMapping = null;
 
     public BuildSystemAwareTestSelectionMediator(final Path root,
-                                                 final GitClient gitClient,
-                                                 final TestReport testReport,
-                                                 final String sourceRevision,
-                                                 final String targetRevision,
-                                                 final Map<String, Set<String>> additionalFileMapping,
+                                                 final TestSelectionStrategy testSelectionStrategy,
                                                  final MavenSession mavenSession) {
         this.root = root;
-        this.gitClient = gitClient;
-        this.testReport = testReport;
-        this.sourceRevision = sourceRevision;
-        this.targetRevision = targetRevision;
-        this.additionalFileMapping = additionalFileMapping;
+        this.testSelectionStrategy = testSelectionStrategy;
         this.mavenSession = mavenSession;
     }
 
     public TestSelectionResult executeTestSelection(Set<ChangeSetItem> changeSetItems) throws IOException {
-        Set<Path> modifiedPOMs = new HashSet<>();
+        Set<Path> modifiedMavenProjectDirs = new HashSet<>();
         for (ChangeSetItem item : changeSetItems) {
             if (item.getChangeType() != ChangeType.DELETED) {
                 if (PathUtils.hasFilename(item.getPath(), POM_XML)) {
-                    modifiedPOMs.add(item.getPath());
+                    modifiedMavenProjectDirs.add(item.getPath().getParent());
                 } else if (PathUtils.hasAnyExtension(item.getPath(), COMPILE_TIME_EXTENSIONS)) {
                     Path parentPOM = findParentPOM(item.getPath().getParent());
-                    modifiedPOMs.add(parentPOM);
+                    modifiedMavenProjectDirs.add(parentPOM.getParent());
                 }
             }
         }
         Set<SelectedTestSuite> preSelectedTestSuites = new HashSet<>();
-        if (!modifiedPOMs.isEmpty() && mavenSession != null) {
+        if (!modifiedMavenProjectDirs.isEmpty() && mavenSession != null) {
             ModuleSelector moduleSelector = new ModuleSelector(mavenSession);
             // We need to select all transitive downstream modules, as a change in the build system configuration
-            // (i.e. to Maven or any compile-time dependency) could potentially affect tests from downstream modules.
-            moduleSelector.selectDownstreamModules(new ArrayList<>(modifiedPOMs));
+            // (i.e. to Maven or any compile-time file) could potentially affect tests from downstream modules.
+            moduleSelector.selectDownstreamModules(new ArrayList<>(modifiedMavenProjectDirs));
             for (MavenProject project : moduleSelector.getSelectedProjects()) {
                 Set<String> testSuiteNames = getTestSuiteMapping()
                         .entrySet()
@@ -91,12 +72,7 @@ public class BuildSystemAwareTestSelectionMediator {
                 }
             }
         }
-        return new FileLevelTestSelection(
-                testReport,
-                gitClient,
-                targetRevision,
-                additionalFileMapping,
-                preSelectedTestSuites).execute(changeSetItems);
+        return testSelectionStrategy.execute(changeSetItems, preSelectedTestSuites);
     }
 
     public Set<String> getModulesForTests(List<SelectedTestSuite> selectedTestSuites) throws IOException {
@@ -110,8 +86,15 @@ public class BuildSystemAwareTestSelectionMediator {
         return mavenModules;
     }
 
-    private Map<String, Path> getTestSuiteMapping(Path root) throws IOException {
-        Set<Path> testFiles = JavaSourceCodeParser.findAllJavaTestFiles(root);
+    private Map<String, Path> getTestSuiteMapping() throws IOException {
+        if (lazyTestSuiteMapping == null) {
+            lazyTestSuiteMapping = getTestSuiteMapping(root);
+        }
+        return lazyTestSuiteMapping;
+    }
+
+    private Map<String, Path> getTestSuiteMapping(Path path) throws IOException {
+        Set<Path> testFiles = JavaSourceCodeParser.findAllJavaTestFiles(path);
         Map<String, Path> testSuiteMapping = new HashMap<>();
         for (Path testFile : testFiles) {
             String testSuiteName = JavaSourceCodeParser.getFullyQualifiedTypeName(testFile);

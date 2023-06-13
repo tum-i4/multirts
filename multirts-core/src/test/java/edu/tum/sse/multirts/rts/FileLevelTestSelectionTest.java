@@ -13,7 +13,9 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.Set;
 
 import static edu.tum.sse.jtec.util.IOUtils.writeToFile;
 import static edu.tum.sse.multirts.util.CollectionUtils.*;
@@ -82,8 +84,8 @@ class FileLevelTestSelectionTest {
         );
 
         // when
-        FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, Collections.emptyMap(), Collections.emptySet());
-        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch));
+        FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, Collections.emptyMap());
+        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch), Collections.emptySet());
 
         // then
         assertEquals(expectedResult, actual);
@@ -102,8 +104,8 @@ class FileLevelTestSelectionTest {
         );
 
         // when
-        FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, Collections.emptyMap(), Collections.emptySet());
-        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch));
+        FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, Collections.emptyMap());
+        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch), Collections.emptySet());
 
         // then
         assertEquals(expectedResult, actual);
@@ -122,8 +124,8 @@ class FileLevelTestSelectionTest {
         );
 
         // when
-        FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, Collections.emptyMap(), Collections.emptySet());
-        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch));
+        FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, Collections.emptyMap());
+        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch), Collections.emptySet());
 
         // then
         assertEquals(expectedResult, actual);
@@ -140,8 +142,8 @@ class FileLevelTestSelectionTest {
         );
 
         // when
-        FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, Collections.emptyMap(), Collections.emptySet());
-        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch));
+        FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, Collections.emptyMap());
+        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch), Collections.emptySet());
 
         // then
         assertEquals(expectedResult, actual);
@@ -160,8 +162,8 @@ class FileLevelTestSelectionTest {
         );
 
         // when
-        FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, Collections.emptyMap(), Collections.emptySet());
-        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch));
+        FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, Collections.emptyMap());
+        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch), Collections.emptySet());
 
         // then
         assertEquals(expectedResult, actual);
@@ -178,8 +180,8 @@ class FileLevelTestSelectionTest {
         );
 
         // when
-        FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, newMap(new AbstractMap.SimpleEntry<>("Bar.cpp", newSet("lib_bar.dll"))), Collections.emptySet());
-        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch));
+        FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, newMap(new AbstractMap.SimpleEntry<>("Bar.cpp", newSet("lib_bar.dll"))));
+        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch), Collections.emptySet());
 
         // then
         assertEquals(expectedResult, actual);
@@ -194,8 +196,8 @@ class FileLevelTestSelectionTest {
         );
 
         // when
-        FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, Collections.emptyMap(), newSet(new SelectedTestSuite(SelectionCause.BUILD_CHANGE, testSuite1)));
-        TestSelectionResult actual = rts.execute(Collections.emptySet());
+        FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, Collections.emptyMap());
+        TestSelectionResult actual = rts.execute(Collections.emptySet(), newSet(new SelectedTestSuite(SelectionCause.BUILD_CHANGE, testSuite1)));
 
         // then
         assertEquals(expectedResult, actual);

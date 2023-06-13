@@ -26,7 +26,7 @@ public class ModuleSelector {
         return selectedProjects;
     }
 
-    private List<MavenProject> getProjectsAtPaths(List<Path> paths) {
+    private List<MavenProject> getProjectsAtPaths(Set<Path> paths) {
         return session.getAllProjects().stream()
                 .filter(project -> paths.contains(project.getBasedir().toPath().normalize().toAbsolutePath()))
                 .collect(Collectors.toList());
@@ -44,7 +44,7 @@ public class ModuleSelector {
      * @param projectPaths Project paths that have been changed
      */
     public void selectTransitiveProjects(List<Path> projectPaths) {
-        List<MavenProject> mavenProjects = getProjectsAtPaths(projectPaths);
+        List<MavenProject> mavenProjects = getProjectsAtPaths(new HashSet<>(projectPaths));
         // Always add modules themselves first.
         selectedProjects.addAll(mavenProjects);
 
@@ -67,7 +67,7 @@ public class ModuleSelector {
      * @param projectPaths Project paths that have been changed
      */
     public void selectUpstreamProjects(List<Path> projectPaths) {
-        List<MavenProject> mavenProjects = getProjectsAtPaths(projectPaths);
+        List<MavenProject> mavenProjects = getProjectsAtPaths(new HashSet<>(projectPaths));
         // Always add modules themselves first.
         selectedProjects.addAll(mavenProjects);
 
@@ -82,7 +82,7 @@ public class ModuleSelector {
      * @param projectPaths Project paths that have been changed
      */
     public void selectDownstreamModules(List<Path> projectPaths) {
-        List<MavenProject> mavenProjects = getProjectsAtPaths(projectPaths);
+        List<MavenProject> mavenProjects = getProjectsAtPaths(new HashSet<>(projectPaths));
         // Always add modules themselves first.
         selectedProjects.addAll(mavenProjects);
 

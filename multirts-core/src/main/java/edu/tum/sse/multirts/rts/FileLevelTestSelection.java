@@ -30,16 +30,14 @@ public class FileLevelTestSelection extends AbstractChangeBasedTestSelection {
      * Here, the source file "/path/to/foo.cpp" is part of the two DLLs "lib_foo.dll" and "lib_bar.dll".
      */
     private final Map<String, Set<String>> additionalFileMapping;
-    private final Set<SelectedTestSuite> preSelectedTestSuites;
 
-    public FileLevelTestSelection(final TestReport testReport, final GitClient gitClient, final String targetRevision, final Map<String, Set<String>> additionalFileMapping, Set<SelectedTestSuite> preSelectedTestSuites) {
+    public FileLevelTestSelection(final TestReport testReport, final GitClient gitClient, final String targetRevision, final Map<String, Set<String>> additionalFileMapping) {
         super(testReport, gitClient, targetRevision);
         this.additionalFileMapping = additionalFileMapping;
-        this.preSelectedTestSuites = preSelectedTestSuites;
     }
 
     @Override
-    public TestSelectionResult execute(final Set<ChangeSetItem> changeSet) {
+    public TestSelectionResult execute(final Set<ChangeSetItem> changeSet, final Set<SelectedTestSuite> preSelectedTestSuites) {
         try {
             AffectedInfo affectedInfo = new AffectedInfo();
             for (final ChangeSetItem item : changeSet) {
@@ -48,7 +46,7 @@ public class FileLevelTestSelection extends AbstractChangeBasedTestSelection {
                 affectedInfo.affectedCoverageEntities.addAll(currentAffectedPair.affectedCoverageEntities);
                 affectedInfo.changedTestSuiteNames.addAll(currentAffectedPair.changedTestSuiteNames);
             }
-            return computeTestSelection(affectedInfo);
+            return computeTestSelection(affectedInfo, preSelectedTestSuites);
         } catch (Exception e) {
             e.printStackTrace();
             throw new TestSelectionException("Failed to execute FileLevelTestSelection with exception: " + e.getMessage());
@@ -85,7 +83,7 @@ public class FileLevelTestSelection extends AbstractChangeBasedTestSelection {
         return affectedTestSuite;
     }
 
-    private TestSelectionResult computeTestSelection(final AffectedInfo affectedInfo) {
+    private TestSelectionResult computeTestSelection(final AffectedInfo affectedInfo, final Set<SelectedTestSuite> preSelectedTestSuites) {
         List<TestSuite> allTestSuites = testReport.getTestSuites();
         List<SelectedTestSuite> selectedTestSuites = new ArrayList<>();
         Set<String> selectedTestSuiteNames = new HashSet<>();

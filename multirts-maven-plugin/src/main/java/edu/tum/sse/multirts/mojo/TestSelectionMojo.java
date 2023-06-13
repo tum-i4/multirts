@@ -4,7 +4,9 @@ import edu.tum.sse.jtec.reporting.TestReport;
 import edu.tum.sse.jtec.reporting.TestSuite;
 import edu.tum.sse.jtec.util.JSONUtils;
 import edu.tum.sse.multirts.rts.BuildSystemAwareTestSelectionMediator;
+import edu.tum.sse.multirts.rts.FileLevelTestSelection;
 import edu.tum.sse.multirts.rts.TestSelectionResult;
+import edu.tum.sse.multirts.rts.TestSelectionStrategy;
 import edu.tum.sse.multirts.vcs.GitClient;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -108,13 +110,10 @@ public class TestSelectionMojo extends AbstractModuleTestSelectionMojo {
                 GitClient gitClient = getGitClient();
                 TestReport testReport = readReport();
                 Map<String, Set<String>> fileMapping = readFileMapping();
+                TestSelectionStrategy rtsStrategy = new FileLevelTestSelection(testReport, gitClient, targetRevision, fileMapping);
                 BuildSystemAwareTestSelectionMediator mediator = new BuildSystemAwareTestSelectionMediator(
                         session.getCurrentProject().getBasedir().toPath(),
-                        gitClient,
-                        testReport,
-                        sourceRevision,
-                        targetRevision,
-                        fileMapping,
+                        rtsStrategy,
                         session
                 );
                 // Select tests.
