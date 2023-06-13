@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,18 +37,29 @@ public class TestSelectionMojo extends AbstractModuleTestSelectionMojo {
     private static final String TESTS_INCLUDED_FILE = "included.txt";
 
     /**
-     * Additional file mappings in CSV format (e.g. DLL-source-mapping).
-     * Expects ';' delimiter.
+     * Label which is used for naming generated file artifacts.
      */
-    @Parameter(name = "multirts.testReport")
+    @Parameter(property = "multirts.label", defaultValue = "tests", required = true, readonly = true)
+    String label;
+
+    /**
+     * Test report in JTeC format.
+     */
+    @Parameter(property = "multirts.testReport")
     File testReportFile;
 
     /**
      * Additional file mappings in CSV format (e.g. DLL-source-mapping).
      * Expects ';' delimiter.
      */
-    @Parameter(name = "multirts.additionalFileMapping")
+    @Parameter(property = "multirts.additionalFileMapping")
     File additionalFileMapping;
+
+    /**
+     * Additional included tests (will be appended to output file).
+     */
+    @Parameter(property = "multirts.includedTests", defaultValue = "**/PackageDependencyTest*")
+    List<String> additionalIncludedTests;
 
     private Map<String, Set<String>> readFileMapping() throws MojoFailureException {
         Map<String, Set<String>> fileMapping = new HashMap<>();
@@ -58,7 +70,7 @@ public class TestSelectionMojo extends AbstractModuleTestSelectionMojo {
                             String[] keyValuePair = line.split(CSV_SEPARATOR, 2);
                             String key = keyValuePair[0];
                             String value = keyValuePair[1];
-                            if (fileMapping.containsValue(key)) {
+                            if (fileMapping.containsKey(key)) {
                                 fileMapping.get(key).add(value);
                             } else {
                                 fileMapping.put(key, CollectionUtils.newSet(value));
@@ -91,25 +103,35 @@ public class TestSelectionMojo extends AbstractModuleTestSelectionMojo {
                 TestReport testReport = readReport();
                 Map<String, Set<String>> fileMapping = readFileMapping();
                 BuildSystemAwareTestSelectionMediator mediator = new BuildSystemAwareTestSelectionMediator(
-                        session,
+                        session.getCurrentProject().getBasedir().toPath(),
                         gitClient,
                         testReport,
                         sourceRevision,
                         targetRevision,
-                        fileMapping
+                        fileMapping,
+                        session
                 );
                 // Select tests.
                 TestSelectionResult testSelectionResult = mediator.executeTestSelection();
                 String selectedTestSuites = toTestSuites(testSelectionResult.getSelectedTestSuites()).stream().map(TestSuite::getTestId).collect(Collectors.joining("\n"));
-                writeToFile(outputDirectory.toPath().resolve(label).resolve(TESTS_INCLUDED_FILE), selectedTestSuites, false, StandardOpenOption.TRUNCATE_EXISTING);
+                // In case any tests have been selected, we add the additionally included tests.
+                if (!testSelectionResult.getSelectedTestSuites().isEmpty()) {
+                    selectedTestSuites = selectedTestSuites + "\n" + String.join("\n", additionalIncludedTests);
+                }
+                writeToFile(outputDirectory.toPath().resolve(getLabel()).resolve(TESTS_INCLUDED_FILE), selectedTestSuites, false, StandardOpenOption.TRUNCATE_EXISTING);
                 // Select modules for tests.
                 Set<String> selectedModules = mediator.getModulesForTests(testSelectionResult.getSelectedTestSuites());
-                writeToFile(outputDirectory.toPath().resolve(label).resolve(MODULE_FILE), String.join("\n", selectedModules), false, StandardOpenOption.TRUNCATE_EXISTING);
+                writeToFile(outputDirectory.toPath().resolve(getLabel()).resolve(MODULE_FILE), String.join("\n", selectedModules), false, StandardOpenOption.TRUNCATE_EXISTING);
             }
         } catch (Exception exception) {
             getLog().error("Failed to run MultiRTS module selection in project " + project.getName());
             exception.printStackTrace();
             throw new MojoFailureException(exception.getMessage());
         }
+    }
+
+    @Override
+    String getLabel() {
+        return label;
     }
 }

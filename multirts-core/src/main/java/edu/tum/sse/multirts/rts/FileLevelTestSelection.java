@@ -38,6 +38,23 @@ public class FileLevelTestSelection extends AbstractChangeBasedTestSelection {
         this.preSelectedTestSuites = preSelectedTestSuites;
     }
 
+    @Override
+    public TestSelectionResult execute(final Set<ChangeSetItem> changeSet) {
+        try {
+            AffectedInfo affectedInfo = new AffectedInfo();
+            for (final ChangeSetItem item : changeSet) {
+                AffectedInfo currentAffectedPair = analyzeChangeSetItem(item);
+                affectedInfo.affectedFiles.addAll(currentAffectedPair.affectedFiles);
+                affectedInfo.affectedCoverageEntities.addAll(currentAffectedPair.affectedCoverageEntities);
+                affectedInfo.changedTestSuiteNames.addAll(currentAffectedPair.changedTestSuiteNames);
+            }
+            return computeTestSelection(affectedInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new TestSelectionException("Failed to execute FileLevelTestSelection with exception: " + e.getMessage());
+        }
+    }
+
     private Optional<SelectedTestSuite> checkTestSuiteAffected(final TestSuite testSuite, final AffectedInfo affectedInfo) {
         Optional<SelectedTestSuite> affectedTestSuite = Optional.empty();
         // Check if test suite affected by any affected file.
@@ -129,23 +146,6 @@ public class FileLevelTestSelection extends AbstractChangeBasedTestSelection {
             affectedInfo.affectedFiles.add(item.getPath().getFileName().toString());
         }
         return affectedInfo;
-    }
-
-    @Override
-    public TestSelectionResult execute(final Set<ChangeSetItem> changeSet) {
-        try {
-            AffectedInfo affectedInfo = new AffectedInfo();
-            for (final ChangeSetItem item : changeSet) {
-                AffectedInfo currentAffectedPair = analyzeChangeSetItem(item);
-                affectedInfo.affectedFiles.addAll(currentAffectedPair.affectedFiles);
-                affectedInfo.affectedCoverageEntities.addAll(currentAffectedPair.affectedCoverageEntities);
-                affectedInfo.changedTestSuiteNames.addAll(currentAffectedPair.changedTestSuiteNames);
-            }
-            return computeTestSelection(affectedInfo);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new TestSelectionException("Failed to execute FileLevelTestSelection with exception: " + e.getMessage());
-        }
     }
 
     static class AffectedInfo {

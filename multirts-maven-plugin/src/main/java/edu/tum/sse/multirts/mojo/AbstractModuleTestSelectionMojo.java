@@ -25,7 +25,7 @@ public abstract class AbstractModuleTestSelectionMojo extends AbstractMultiRTSMo
     String targetRevision;
 
     /**
-     * The source revision (commit identifier or branch name) where the changes are currently.
+     * The source revision (commit identifier or branch name) where the changes are currently versioned.
      */
     @Parameter(property = "multirts.sourceRevision", defaultValue = "HEAD")
     String sourceRevision;

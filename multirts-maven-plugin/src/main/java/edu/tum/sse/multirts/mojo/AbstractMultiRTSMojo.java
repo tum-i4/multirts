@@ -22,12 +22,6 @@ public abstract class AbstractMultiRTSMojo extends AbstractMojo {
     MavenProject project;
 
     /**
-     * Label which is used for naming generated file artifacts.
-     */
-    @Parameter(property = "multirts.label", defaultValue = "tests", required = true, readonly = true)
-    String label;
-
-    /**
      * Output directory for generated artifacts.
      */
     @Parameter(property = "multirts.output", defaultValue = "${basedir}/.multirts")
@@ -35,6 +29,8 @@ public abstract class AbstractMultiRTSMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${session}")
     MavenSession session;
+
+    abstract String getLabel();
 
     void log(String message) {
         if (debug) {

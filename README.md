@@ -53,21 +53,27 @@ Therefore, the simplest way to use MultiRTS in a Maven project is through the Ma
 </build>
 ```
 
-## Module + Test Selection
+## Example for Module + Test Selection
+
+### Module Selection
 
 ```shell
 # compute set of changed modules
-$ mvn multirts:module-selection -Dmultirts.label="modules"
-
-$ mvn multirts:test-selection -Dmultirts.label="tests"
+$ mvn multirts:module-selection
 ```
 
-## Test Selection
+### Test Selection
 
 MultiRTS generates a `includes.txt` file which can then be passed to Maven Surefire or Failsafe:
 
 ```shell
 $ mvn test -fn -Dsurefire.includesFile="includes.txt"
+```
+
+### Selective Build and Test
+
+```shell
+$ mvn
 ```
 
 ## Acknowledgments & Contributors

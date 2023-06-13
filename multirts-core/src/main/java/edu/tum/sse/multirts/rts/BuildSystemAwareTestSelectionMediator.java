@@ -17,12 +17,14 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static edu.tum.sse.multirts.modules.MavenProjectLocationCache.POM_XML;
+import static edu.tum.sse.multirts.modules.MavenProjectLocationCache.findParentPOM;
+
 /**
  * Mediator class to steer the build system aware test (and test module) selection.
  */
 public class BuildSystemAwareTestSelectionMediator {
 
-    private static final String POM_XML = "pom.xml";
     private static final List<String> COMPILE_TIME_EXTENSIONS = CollectionUtils.newList(".wsdl", ".xsd");
 
     private final MavenSession mavenSession;
@@ -31,29 +33,30 @@ public class BuildSystemAwareTestSelectionMediator {
     private final String sourceRevision;
     private final String targetRevision;
     private final Map<String, Set<String>> additionalFileMapping;
-
-    private final Map<Path, Path> mavenPOMCache = new HashMap<>();
+    private final Path root;
     private Map<String, Path> testSuiteMappingCache = null;
 
     private Map<String, Path> getTestSuiteMapping() throws IOException {
         if (testSuiteMappingCache == null) {
-             testSuiteMappingCache = getTestSuiteMapping(mavenSession.getCurrentProject().getBasedir().toPath());
+             testSuiteMappingCache = getTestSuiteMapping(root);
         }
         return testSuiteMappingCache;
     }
 
-    public BuildSystemAwareTestSelectionMediator(final MavenSession mavenSession,
+    public BuildSystemAwareTestSelectionMediator(final Path root,
                                                  final GitClient gitClient,
                                                  final TestReport testReport,
                                                  final String sourceRevision,
                                                  final String targetRevision,
-                                                 final Map<String, Set<String>> additionalFileMapping) {
-        this.mavenSession = mavenSession;
+                                                 final Map<String, Set<String>> additionalFileMapping,
+                                                 final MavenSession mavenSession) {
+        this.root = root;
         this.gitClient = gitClient;
         this.testReport = testReport;
         this.sourceRevision = sourceRevision;
         this.targetRevision = targetRevision;
         this.additionalFileMapping = additionalFileMapping;
+        this.mavenSession = mavenSession;
     }
 
     public TestSelectionResult executeTestSelection() throws IOException {
@@ -70,7 +73,7 @@ public class BuildSystemAwareTestSelectionMediator {
             }
         }
         Set<SelectedTestSuite> preSelectedTestSuites = new HashSet<>();
-        if (!modifiedPOMs.isEmpty()) {
+        if (!modifiedPOMs.isEmpty() && mavenSession != null) {
             ModuleSelector moduleSelector = new ModuleSelector(mavenSession);
             // We need to select all transitive downstream modules, as a change in the build system configuration
             // (i.e. to Maven or any compile-time dependency) could potentially affect tests from downstream modules.
@@ -106,18 +109,6 @@ public class BuildSystemAwareTestSelectionMediator {
             }
         }
         return mavenModules;
-    }
-
-    private Path findParentPOM(Path path) {
-        if (mavenPOMCache.containsKey(path)) {
-            return mavenPOMCache.get(path);
-        }
-        Path pom = path.resolve(POM_XML);
-        if (!pom.toFile().exists()) {
-            pom = findParentPOM(path.getParent());
-        }
-        mavenPOMCache.put(path, pom);
-        return pom;
     }
 
     private Map<String, Path> getTestSuiteMapping(Path root) throws IOException {

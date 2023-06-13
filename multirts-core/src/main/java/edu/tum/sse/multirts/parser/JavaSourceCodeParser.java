@@ -21,12 +21,12 @@ public class JavaSourceCodeParser {
 
     // Regex based on Maven Surefire:
     // https://maven.apache.org/surefire/maven-surefire-plugin/examples/inclusion-exclusion.html
-    public static String TEST_FILE_PATTERN = ".*test.*.java";
+    public static String TEST_FILE_PATTERN = "(Test.*|.*Test|TestCase.*|.*TestCase|.*Tests).java";
 
     public static Set<Path> findAllJavaTestFiles(Path root) throws IOException {
         return Files.find(root,
                 Integer.MAX_VALUE,
-                (path, basicFileAttributes) -> isJavaFile(path) && isTestFile(path)
+                (path, basicFileAttributes) -> isTestFile(path)
         ).collect(Collectors.toSet());
     }
 
@@ -35,7 +35,7 @@ public class JavaSourceCodeParser {
     }
 
     public static boolean isTestFile(final Path path) {
-        return path.toFile().getName().toLowerCase().matches(TEST_FILE_PATTERN);
+        return path.toFile().getName().matches(TEST_FILE_PATTERN);
     }
 
     public static Set<String> getAllFullyQualifiedTypeNames(final String code) {
