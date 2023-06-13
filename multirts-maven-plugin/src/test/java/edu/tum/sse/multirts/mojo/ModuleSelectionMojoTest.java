@@ -29,7 +29,7 @@ public class ModuleSelectionMojoTest {
         // given
         when(gitClient.getDiff(any(), any())).thenReturn(newSet(new ChangeSetItem(ChangeType.MODIFIED, Paths.get("a/c/A.java")), new ChangeSetItem(ChangeType.MODIFIED, Paths.get("a/b/B.java"))));
         ModuleSelectionMojo mojo = new ModuleSelectionMojo();
-        mojo.fileFilter = "^(?!.*c" + File.separator + ").*$";
+        mojo.fileFilter = "^(?!.*c[\\|/]).*$";
         Set<ChangeSetItem> expected = newSet(new ChangeSetItem(ChangeType.MODIFIED, Paths.get("a/b/B.java")));
 
         // when
