@@ -90,6 +90,26 @@ class FileLevelTestSelectionTest {
     }
 
     @Test
+    void shouldSelectTestsForAddedTest() throws GitAPIException, IOException {
+        // given
+        writeToFile(tmpDir.resolve("FooBarTest.java"), "package foo; public class FooBarTest { void testFooBar(){ Foo f; } }", false);
+        TestSuite testSuite3 = new TestSuite();
+        testSuite3.setTestId("foo.FooBarTest");
+        GitTestUtils.commitEverything(repo);
+        TestSelectionResult expectedResult = new TestSelectionResult(
+                newList(new SelectedTestSuite(SelectionCause.ADDED_CHANGED, testSuite3)),
+                newList(testSuite1, testSuite2)
+        );
+
+        // when
+        FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, Collections.emptyMap(), Collections.emptySet());
+        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch));
+
+        // then
+        assertEquals(expectedResult, actual);
+    }
+
+    @Test
     void shouldSelectTestsForRemovedFile() throws GitAPIException, IOException {
         // given
         tmpDir.resolve("Foo.java").toFile().delete();
@@ -160,6 +180,22 @@ class FileLevelTestSelectionTest {
         // when
         FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, newMap(new AbstractMap.SimpleEntry<>("Bar.cpp", newSet("lib_bar.dll"))), Collections.emptySet());
         TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch));
+
+        // then
+        assertEquals(expectedResult, actual);
+    }
+
+    @Test
+    void shouldSelectPreIncludedTests() {
+        // given
+        TestSelectionResult expectedResult = new TestSelectionResult(
+                newList(new SelectedTestSuite(SelectionCause.BUILD_CHANGE, testSuite1)),
+                newList(testSuite2)
+        );
+
+        // when
+        FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, Collections.emptyMap(), newSet(new SelectedTestSuite(SelectionCause.BUILD_CHANGE, testSuite1)));
+        TestSelectionResult actual = rts.execute(Collections.emptySet());
 
         // then
         assertEquals(expectedResult, actual);
