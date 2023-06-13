@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,6 +45,7 @@ class ChangeBasedModuleSelectionTest {
 
         // then
         assertEquals(modules.size(), 1);
+        System.err.println("Modules: " + String.join(",", modules));
         assertTrue(modules.containsAll(newSet("f/g/pom.xml")));
     }
 
@@ -55,7 +57,7 @@ class ChangeBasedModuleSelectionTest {
         when(gitClient.getRoot()).thenReturn(sampleProjectRoot);
 
         // when
-        ChangeBasedModuleSelection moduleSelection = new ChangeBasedModuleSelection(gitClient, mavenProject, newList("/main/"));
+        ChangeBasedModuleSelection moduleSelection = new ChangeBasedModuleSelection(gitClient, mavenProject, newList(File.separator + "main" + File.separator));
         Set<String> modules = moduleSelection.execute(changeSet);
 
         // then
