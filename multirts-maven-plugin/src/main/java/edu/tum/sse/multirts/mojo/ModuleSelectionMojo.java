@@ -41,21 +41,25 @@ public class ModuleSelectionMojo extends AbstractModuleTestSelectionMojo {
             if (session.getCurrentProject().isExecutionRoot()) {
                 GitClient gitClient = new GitClient(gitRepositoryRoot.toPath());
                 ChangeBasedModuleSelection moduleSelection = new ChangeBasedModuleSelection(gitClient, project, fullBuildPaths);
-                Set<String> modules = moduleSelection.execute(gitClient.getDiff(sourceRevision, targetRevision));
-                StringBuilder builder = new StringBuilder();
-                for (String module : modules) {
-                    for (String stripDir : stripDirectories) {
-                        builder.append(module.replace(stripDir + "/" + POM_XML, POM_XML));
-                        builder.append("\n");
-                    }
-                }
-                writeToFile(outputDirectory.toPath().resolve(getLabel()).resolve(MODULE_FILE), builder.toString(), false, StandardOpenOption.TRUNCATE_EXISTING);
+                Set<String> selectedModules = moduleSelection.execute(gitClient.getDiff(sourceRevision, targetRevision));
+                writeToFile(outputDirectory.toPath().resolve(getLabel()).resolve(MODULE_FILE), buildModulesString(selectedModules), false, StandardOpenOption.TRUNCATE_EXISTING);
             }
         } catch (final Exception exception) {
             getLog().error("Failed to run MultiRTS module selection in project " + project.getName());
             exception.printStackTrace();
             throw new MojoFailureException(exception.getMessage());
         }
+    }
+
+    private String buildModulesString(Set<String> selectedModules) {
+        StringBuilder builder = new StringBuilder();
+        for (String module : selectedModules) {
+            for (String stripDir : stripDirectories) {
+                builder.append(module.replace(stripDir + "/" + POM_XML, POM_XML));
+                builder.append("\n");
+            }
+        }
+        return builder.toString();
     }
 
     @Override

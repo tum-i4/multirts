@@ -61,7 +61,7 @@ public class ChangeBasedModuleSelection {
                     PathUtils.hasFilename(filePath, POM_XML) || PathUtils.hasAnyExtension(filePath, RELEVANT_FILE_EXTENSIONS))
             ) {
                 Path parentPOM = findParentPOM(filePath.getParent()).toAbsolutePath();
-                selectedModules.add(parentPOM.relativize(mavenRootProject.getBasedir().toPath().toAbsolutePath()).toString());
+                selectedModules.add(mavenRootProject.getBasedir().toPath().relativize(parentPOM).toString());
             }
         }
         return selectedModules;
