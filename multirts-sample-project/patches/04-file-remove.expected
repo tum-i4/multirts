@@ -1,0 +1,9 @@
+module-selection:
+    modules:
+
+test-selection:
+    tests:
+        a.b.c.foobar.FileOpenTest
+
+    modules:
+        baz/foobar/pom.xml

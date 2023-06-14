@@ -1,0 +1,10 @@
+module-selection:
+    modules:
+        bar/pom.xml
+
+test-selection:
+    tests:
+        a.b.c.bar.FooBarTest
+
+    modules:
+        bar/pom.xml

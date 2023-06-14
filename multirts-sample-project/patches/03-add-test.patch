@@ -1,0 +1,19 @@
+diff --git a/multirts-sample-project/bar/src/test/java/a/b/c/bar/FooBarTest.java b/multirts-sample-project/bar/src/test/java/a/b/c/bar/FooBarTest.java
+new file mode 100644
+index 0000000..7c47019
+--- /dev/null
++++ b/multirts-sample-project/bar/src/test/java/a/b/c/bar/FooBarTest.java
+@@ -0,0 +1,13 @@
++package a.b.c.bar;
++
++import org.junit.jupiter.api.Test;
++
++import static org.junit.jupiter.api.Assertions.assertFalse;
++
++class FooBarTest {
++
++    @Test
++    void shouldBarReturnFalse() {
++        assertFalse(Bar.bar());
++    }
++}

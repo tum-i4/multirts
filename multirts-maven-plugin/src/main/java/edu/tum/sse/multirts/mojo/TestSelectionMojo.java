@@ -112,7 +112,8 @@ public class TestSelectionMojo extends AbstractModuleTestSelectionMojo {
                 Map<String, Set<String>> fileMapping = readFileMapping();
                 TestSelectionStrategy rtsStrategy = new FileLevelTestSelection(testReport, gitClient, targetRevision, fileMapping);
                 BuildSystemAwareTestSelectionMediator mediator = new BuildSystemAwareTestSelectionMediator(
-                        session.getCurrentProject().getBasedir().toPath(),
+                        session.getCurrentProject().getBasedir().toPath().normalize().toAbsolutePath(),
+                        gitRepositoryRoot.toPath().normalize().toAbsolutePath(),
                         rtsStrategy,
                         session
                 );

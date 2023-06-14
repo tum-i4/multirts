@@ -1,0 +1,12 @@
+module-selection:
+    modules:
+        foo/pom.xml
+
+test-selection:
+    tests:
+        a.b.c.foo.FooTest
+        a.b.c.bar.FooTestCase
+
+    modules:
+        bar/pom.xml
+        foo/pom.xml

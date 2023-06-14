@@ -54,6 +54,7 @@ class BuildSystemAwareTestSelectionMediatorTest {
         when(projectDependencyGraph.getDownstreamProjects(any(), anyBoolean())).thenReturn(newList(mavenProject1));
         BuildSystemAwareTestSelectionMediator mediator = new BuildSystemAwareTestSelectionMediator(
                 sampleProjectRoot,
+                sampleProjectRoot,
                 testSelectionStrategy,
                 mavenSession);
         TestSuite testSuite1 = new TestSuite();
@@ -73,6 +74,7 @@ class BuildSystemAwareTestSelectionMediatorTest {
         // given
         Path sampleProjectRoot = Paths.get(Objects.requireNonNull(getClass().getClassLoader().getResource("test-module-selection/sample-project")).toURI());
         BuildSystemAwareTestSelectionMediator mediator = new BuildSystemAwareTestSelectionMediator(
+                sampleProjectRoot,
                 sampleProjectRoot,
                 testSelectionStrategy,
                 mavenSession);
@@ -101,6 +103,7 @@ class BuildSystemAwareTestSelectionMediatorTest {
         when(mavenSession.getAllProjects()).thenReturn(newList(mavenProject1, mavenProject2));
         when(projectDependencyGraph.getDownstreamProjects(any(), anyBoolean())).thenReturn(newList(mavenProject1));
         BuildSystemAwareTestSelectionMediator mediator = new BuildSystemAwareTestSelectionMediator(
+                sampleProjectRoot,
                 sampleProjectRoot,
                 testSelectionStrategy,
                 mavenSession);
