@@ -1,0 +1,4 @@
+/some/other/path/lib_test.dll;/some/path/mb2cpp/proj-x/src/test.cpp
+/some/other/path/lib_test.dll;/some/path/mb2cpp/proj-x/src/xxx.cpp
+/some/other/path/lib_test.dll;/some/path/mb2cpp/proj-z/src/z.cpp
+/some/other/path/lib_xxx.dll;/some/path/mb2cpp/proj-y/src/test.cpp

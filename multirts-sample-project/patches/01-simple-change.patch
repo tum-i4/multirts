@@ -1,0 +1,12 @@
+diff --git a/multirts-sample-project/foo/src/main/java/a/b/c/foo/Foo.java b/multirts-sample-project/foo/src/main/java/a/b/c/foo/Foo.java
+index 5f91f50..d09b01f 100644
+--- a/multirts-sample-project/foo/src/main/java/a/b/c/foo/Foo.java
++++ b/multirts-sample-project/foo/src/main/java/a/b/c/foo/Foo.java
+@@ -2,6 +2,6 @@ package a.b.c.foo;
+ 
+ public class Foo {
+     public static boolean foo() {
+-        return true;
++        return false;
+     }
+ }

@@ -31,12 +31,12 @@ public final class SelectedTestSuite {
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final SelectedTestSuite that = (SelectedTestSuite) o;
-        return testSuite.equals(that.testSuite) && selectionCause.equals(that.selectionCause);
+        SelectedTestSuite that = (SelectedTestSuite) o;
+        return testSuite.getTestId().equals(that.testSuite.getTestId()) && selectionCause.equals(that.selectionCause);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(testSuite, selectionCause);
+        return Objects.hash(testSuite.getTestId(), selectionCause);
     }
 }

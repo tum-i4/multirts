@@ -1,5 +1,6 @@
 package edu.tum.sse.multirts.mojo;
 
+import edu.tum.sse.multirts.vcs.GitClient;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -24,11 +25,13 @@ public abstract class AbstractMultiRTSMojo extends AbstractMojo {
     /**
      * Output directory for generated artifacts.
      */
-    @Parameter(property = "multirts.output", defaultValue = "${basedir}/.multirts")
+    @Parameter(property = "multirts.output", defaultValue = "${basedir}/target/.multirts")
     File outputDirectory;
 
     @Parameter(defaultValue = "${session}")
     MavenSession session;
+
+    abstract String getLabel();
 
     void log(String message) {
         if (debug) {

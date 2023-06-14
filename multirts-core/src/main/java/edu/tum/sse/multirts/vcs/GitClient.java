@@ -82,7 +82,7 @@ public final class GitClient {
             if (proc.exitValue() != 0) {
                 throw new RuntimeException("Failed to execute command " + command);
             }
-            // TODO: check if this works if BOM is present
+            // TODO: check if this works when BOM is present
             content = collectAllLines(proc.getInputStream()).stream().collect(Collectors.joining(System.lineSeparator()));
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -125,16 +125,17 @@ public final class GitClient {
      * We don't use the {@link Git} object here, as it overcomplicates things for our use case.
      * Instead, we invoke "git diff" manually and ignore all pure whitespace changes as they're irrelevant for us.
      *
-     * @param fromRevision source commit hash for diff comparison
-     * @param toRevision   target commit hash for diff comparison
+     * @param fromRevision commit hash for diff comparison
+     * @param toRevision   commit hash for diff comparison
      * @return set of file paths
      */
     public Set<ChangeSetItem> getDiff(String fromRevision, String toRevision) {
         // We use the three-dot diff (A...B) here to figure out the diff between the latest common ancestor and the source branch.
         // This will make sure to only consider changes made inside a line of commits (e.g. in a pull request) and no changes from the target branch.
         final String diffRange = fromRevision + "..." + toRevision;
-        if (diffCache.containsKey(diffRange))
+        if (diffCache.containsKey(diffRange)) {
             return diffCache.get(diffRange);
+        }
         // The reason we don't simply use --name-status or --name-only is that these options are
         // incompatible with ignoring only whitespace changes (which we would then still need to filter out).
         final String command = String.format(

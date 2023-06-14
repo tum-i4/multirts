@@ -13,7 +13,9 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.Set;
 
 import static edu.tum.sse.jtec.util.IOUtils.writeToFile;
 import static edu.tum.sse.multirts.util.CollectionUtils.*;
@@ -83,7 +85,27 @@ class FileLevelTestSelectionTest {
 
         // when
         FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, Collections.emptyMap());
-        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch));
+        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch), Collections.emptySet());
+
+        // then
+        assertEquals(expectedResult, actual);
+    }
+
+    @Test
+    void shouldSelectTestsForAddedTest() throws GitAPIException, IOException {
+        // given
+        writeToFile(tmpDir.resolve("FooBarTest.java"), "package foo; public class FooBarTest { void testFooBar(){ Foo f; } }", false);
+        TestSuite testSuite3 = new TestSuite();
+        testSuite3.setTestId("foo.FooBarTest");
+        GitTestUtils.commitEverything(repo);
+        TestSelectionResult expectedResult = new TestSelectionResult(
+                newList(new SelectedTestSuite(SelectionCause.ADDED_CHANGED, testSuite3)),
+                newList(testSuite1, testSuite2)
+        );
+
+        // when
+        FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, Collections.emptyMap());
+        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch), Collections.emptySet());
 
         // then
         assertEquals(expectedResult, actual);
@@ -103,7 +125,7 @@ class FileLevelTestSelectionTest {
 
         // when
         FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, Collections.emptyMap());
-        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch));
+        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch), Collections.emptySet());
 
         // then
         assertEquals(expectedResult, actual);
@@ -121,7 +143,7 @@ class FileLevelTestSelectionTest {
 
         // when
         FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, Collections.emptyMap());
-        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch));
+        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch), Collections.emptySet());
 
         // then
         assertEquals(expectedResult, actual);
@@ -141,7 +163,7 @@ class FileLevelTestSelectionTest {
 
         // when
         FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, Collections.emptyMap());
-        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch));
+        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch), Collections.emptySet());
 
         // then
         assertEquals(expectedResult, actual);
@@ -159,7 +181,23 @@ class FileLevelTestSelectionTest {
 
         // when
         FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, newMap(new AbstractMap.SimpleEntry<>("Bar.cpp", newSet("lib_bar.dll"))));
-        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch));
+        TestSelectionResult actual = rts.execute(gitClient.getDiff(targetBranch, sourceBranch), Collections.emptySet());
+
+        // then
+        assertEquals(expectedResult, actual);
+    }
+
+    @Test
+    void shouldSelectPreIncludedTests() {
+        // given
+        TestSelectionResult expectedResult = new TestSelectionResult(
+                newList(new SelectedTestSuite(SelectionCause.BUILD_CHANGE, testSuite1)),
+                newList(testSuite2)
+        );
+
+        // when
+        FileLevelTestSelection rts = new FileLevelTestSelection(testReport, gitClient, targetBranch, Collections.emptyMap());
+        TestSelectionResult actual = rts.execute(Collections.emptySet(), newSet(new SelectedTestSuite(SelectionCause.BUILD_CHANGE, testSuite1)));
 
         // then
         assertEquals(expectedResult, actual);

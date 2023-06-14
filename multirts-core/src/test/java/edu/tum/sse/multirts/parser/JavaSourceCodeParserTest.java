@@ -1,9 +1,11 @@
 package edu.tum.sse.multirts.parser;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -11,6 +13,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static edu.tum.sse.jtec.util.IOUtils.createFileAndEnclosingDir;
+import static edu.tum.sse.jtec.util.IOUtils.writeToFile;
+import static edu.tum.sse.multirts.util.CollectionUtils.newSet;
 import static org.junit.jupiter.api.Assertions.*;
 
 class JavaSourceCodeParserTest {
@@ -35,7 +40,7 @@ class JavaSourceCodeParserTest {
     }
 
     @Test
-    void shouldFindFullyQualifiedName() throws IOException, URISyntaxException, JavaSourceCodeParser.JavaParserException {
+    void shouldFindFullyQualifiedName() throws IOException, URISyntaxException {
         final Path javaFile = Paths.get(Objects.requireNonNull(getClass().getClassLoader().getResource("Sample.java")).toURI());
         final String expected = "foo.Sample";
 
@@ -77,5 +82,23 @@ class JavaSourceCodeParserTest {
 
         // then
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void shouldFindAllJavaTestFiles(@TempDir Path tempDir) throws IOException {
+        // given
+        Files.createDirectories(tempDir.resolve("a"));
+        Files.createDirectories(tempDir.resolve("b"));
+        writeToFile(tempDir.resolve("a/TestA.java"), "package a; public class TestA {}", false);
+        writeToFile(tempDir.resolve("a/A.java"), "package a; public class A {}", false);
+        writeToFile(tempDir.resolve("b/B.java"), "package b; public class B {}", false);
+        writeToFile(tempDir.resolve("b/BTest.java"), "package b; public class BTest {}", false);
+
+        // when
+        Set<Path> paths = JavaSourceCodeParser.findAllJavaTestFiles(tempDir);
+
+        // then
+        assertEquals(paths.size(), 2);
+        assertTrue(paths.containsAll(newSet(tempDir.resolve("a/TestA.java"), tempDir.resolve("b/BTest.java"))));
     }
 }

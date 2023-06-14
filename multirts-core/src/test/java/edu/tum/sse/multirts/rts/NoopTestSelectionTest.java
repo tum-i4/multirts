@@ -27,7 +27,7 @@ class NoopTestSelectionTest {
 
 
         // when
-        TestSelectionResult actualResult = new NoopTestSelection(testReport).execute(Collections.emptySet());
+        TestSelectionResult actualResult = new NoopTestSelection(testReport).execute(Collections.emptySet(), Collections.emptySet());
 
         // then
         assertEquals(expectedResult, actualResult);
