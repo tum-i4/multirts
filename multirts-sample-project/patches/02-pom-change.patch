@@ -1,0 +1,11 @@
+diff --git a/multirts-sample-project/foo/pom.xml b/multirts-sample-project/foo/pom.xml
+index 19b04a4..61ba71b 100644
+--- a/multirts-sample-project/foo/pom.xml
++++ b/multirts-sample-project/foo/pom.xml
+@@ -11,5 +11,6 @@
+ 
+     <artifactId>foo</artifactId>
+     <name>foo</name>
++    <properties></properties>
+ 
+ </project>

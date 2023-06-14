@@ -1,0 +1,8 @@
+diff --git a/multirts-sample-project/baz/foobar/src/test/resources/test.txt b/multirts-sample-project/baz/foobar/src/test/resources/test.txt
+deleted file mode 100644
+index f6ea049..0000000
+--- a/multirts-sample-project/baz/foobar/src/test/resources/test.txt
++++ /dev/null
+@@ -1 +0,0 @@
+-foobar
+\ No newline at end of file
