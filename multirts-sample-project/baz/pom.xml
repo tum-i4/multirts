@@ -16,12 +16,4 @@
     <name>baz</name>
     <packaging>pom</packaging>
 
-    <dependencies>
-        <dependency>
-            <groupId>a.b.c</groupId>
-            <artifactId>foo</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-    </dependencies>
-
 </project>
