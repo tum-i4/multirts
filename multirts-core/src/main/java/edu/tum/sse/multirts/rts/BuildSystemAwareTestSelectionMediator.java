@@ -1,13 +1,11 @@
 package edu.tum.sse.multirts.rts;
 
-import edu.tum.sse.jtec.reporting.TestReport;
 import edu.tum.sse.jtec.reporting.TestSuite;
 import edu.tum.sse.multirts.modules.ModuleSelector;
 import edu.tum.sse.multirts.parser.JavaSourceCodeParser;
 import edu.tum.sse.multirts.util.PathUtils;
 import edu.tum.sse.multirts.vcs.ChangeSetItem;
 import edu.tum.sse.multirts.vcs.ChangeType;
-import edu.tum.sse.multirts.vcs.GitClient;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 
@@ -29,13 +27,13 @@ public class BuildSystemAwareTestSelectionMediator {
 
     private final MavenSession mavenSession;
     private final TestSelectionStrategy testSelectionStrategy;
-    private final Path root;
+    private final Path mavenRoot;
     private Map<String, Path> lazyTestSuiteMapping = null;
 
-    public BuildSystemAwareTestSelectionMediator(final Path root,
+    public BuildSystemAwareTestSelectionMediator(final Path mavenRoot,
                                                  final TestSelectionStrategy testSelectionStrategy,
                                                  final MavenSession mavenSession) {
-        this.root = root;
+        this.mavenRoot = mavenRoot;
         this.testSelectionStrategy = testSelectionStrategy;
         this.mavenSession = mavenSession;
     }
@@ -80,7 +78,7 @@ public class BuildSystemAwareTestSelectionMediator {
         for (SelectedTestSuite testSuite : selectedTestSuites) {
             if (getTestSuiteMapping().containsKey(testSuite.getTestSuite().getTestId())) {
                 Path testSuiteParentPOM = findParentPOM(getTestSuiteMapping().get(testSuite.getTestSuite().getTestId()).getParent());
-                mavenModules.add(testSuiteParentPOM.toString());
+                mavenModules.add(mavenRoot.relativize(testSuiteParentPOM).toString());
             }
         }
         return mavenModules;
@@ -88,7 +86,7 @@ public class BuildSystemAwareTestSelectionMediator {
 
     private Map<String, Path> getTestSuiteMapping() throws IOException {
         if (lazyTestSuiteMapping == null) {
-            lazyTestSuiteMapping = getTestSuiteMapping(root);
+            lazyTestSuiteMapping = getTestSuiteMapping(mavenRoot);
         }
         return lazyTestSuiteMapping;
     }

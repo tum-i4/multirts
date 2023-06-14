@@ -1,5 +1,7 @@
 # MultiRTS: Build System Aware Multi-language Regression Test Selection
 
+![CI](https://github.com/tum-i4/multirts/actions/workflows/maven.yml/badge.svg)
+
 MultiRTS is a research tool for regression test selection.
 It therefore uses test traces generated from [JTeC](https://github.com/tum-i4/JTeC).
 
@@ -11,7 +13,8 @@ had a Python CLI to steer the test/module selection process.*
 ```
 ├── multirts-core             <- The MultiRTS core package contains code for test and module selection.
 ├── multirts-maven-extension  <- MultiRTS Maven extension for selective Maven reactor build.
-└── multirts-maven-plugin     <- MultiRTS Maven plugin for steering the test and module selection.
+├── multirts-maven-plugin     <- MultiRTS Maven plugin for steering the test and module selection.
+└── multirts-sample-project   <- Sample project to demonstrate usage of MultiRTS.
 ```
 
 ## Setup
@@ -33,7 +36,6 @@ MultiRTS is built to be used with Maven Surefire and Failsafe.
 Therefore, the simplest way to use MultiRTS in a Maven project is through the Maven extension and plugin:
 
 ```xml
-
 <build>
     <plugins>
         <!-- The extension hooks into Maven lifecycle to build only selected modules. -->
@@ -53,28 +55,7 @@ Therefore, the simplest way to use MultiRTS in a Maven project is through the Ma
 </build>
 ```
 
-## Example for Module + Test Selection
-
-### Module Selection
-
-```shell
-# compute set of changed modules
-$ mvn multirts:module-selection
-```
-
-### Test Selection
-
-MultiRTS generates a `includes.txt` file which can then be passed to Maven Surefire or Failsafe:
-
-```shell
-$ mvn test -fn -Dsurefire.includesFile="includes.txt"
-```
-
-### Selective Build and Test
-
-```shell
-$ mvn
-```
+A sample project that demonstrates how to use MultiRTS can be found in the [multirts-sample-project](./multirts-sample-project) directory.
 
 ## Acknowledgments & Contributors
 

@@ -80,7 +80,7 @@ class BuildSystemAwareTestSelectionMediatorTest {
         testSuite1.setTestId("a.b.c.e.TestE");
         TestSuite testSuite2 = new TestSuite();
         testSuite2.setTestId("a.b.c.h.TestH");
-        Set<String> expected = newSet(sampleProjectRoot.resolve("h/pom.xml").toString(), sampleProjectRoot.resolve("e/pom.xml").toString());
+        Set<String> expected = newSet(Paths.get("h/pom.xml").toString(), Paths.get("e/pom.xml").toString());
 
         // when
         Set<String> actual = mediator.getModulesForTests(newList(new SelectedTestSuite(SelectionCause.BUILD_CHANGE, testSuite1), new SelectedTestSuite(SelectionCause.BUILD_CHANGE, testSuite2)));

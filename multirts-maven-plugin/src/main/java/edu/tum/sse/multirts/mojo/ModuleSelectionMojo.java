@@ -12,6 +12,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -51,7 +52,7 @@ public class ModuleSelectionMojo extends AbstractModuleTestSelectionMojo {
                 Set<String> selectedModules = moduleSelection.execute(changeSet);
                 Path includedModules = outputDirectory.toPath().resolve(getLabel()).resolve(MODULE_FILE);
                 createFileAndEnclosingDir(includedModules);
-                writeToFile(includedModules, buildModulesString(selectedModules), false, StandardOpenOption.TRUNCATE_EXISTING);
+                writeToFile(includedModules, buildModulesString(new ArrayList<>(selectedModules)), false, StandardOpenOption.TRUNCATE_EXISTING);
             }
         } catch (final Exception exception) {
             getLog().error("Failed to run MultiRTS module selection in project " + project.getName());
@@ -60,15 +61,18 @@ public class ModuleSelectionMojo extends AbstractModuleTestSelectionMojo {
         }
     }
 
-    String buildModulesString(Set<String> selectedModules) {
-        StringBuilder builder = new StringBuilder();
-        for (String module : selectedModules) {
+    String buildModulesString(List<String> selectedModules) {
+        for (int i = 0; i < selectedModules.size(); i++) {
+            String module = selectedModules.get(i);
             for (String stripDir : stripDirectories) {
-                builder.append(module.replace(stripDir + File.separator + POM_XML, POM_XML));
-                builder.append("\n");
+                String toReplace = stripDir + File.separator + POM_XML;
+                if (module.contains(toReplace)) {
+                    selectedModules.set(i, module.replace(toReplace, POM_XML));
+                    break;
+                }
             }
         }
-        return builder.toString();
+        return String.join("\n", selectedModules);
     }
 
     @Override

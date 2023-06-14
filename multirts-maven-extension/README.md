@@ -9,10 +9,10 @@ Also, these options don't support *transitively* finding all modules that need t
 but are limited to building all up-/downstream modules (and *not* all transitive upstream modules for all downstream
 modules).
 
-| Key                          | Type             | Description                                                                                                                                 |
-|------------------------------|------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
-| `multirts.transitiveModules` | `List[Path]`     | Comma-separated list of filepaths that include new-line separated Maven module paths; will execute all transitively dependent Maven modules |
-| `multirts.upstreamModules`   | `List[Path]`     | Comma-separated list of filepaths that include new-line separated Maven module paths; will execute all transitive upstream Maven modules    |
-| `multirts.downstreamModules` | `List[Path]`     | Comma-separated list of filepaths that include new-line separated Maven module paths; will execute all transitive downstream Maven modules  |
-| `multirts.moduleOutput`      | `Optional[Path]` | Filepath where to write selected Maven modules (optional)                                                                                   |
-| `multirts.filterExecution`   | `Boolean`        | Filter the Maven execution to the selected Maven modules; default: `false` (will only compute the set of modules, but not filter them)      |
+| Key                          | Type             | Description                                                                                                                                                     |
+|------------------------------|------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `multirts.transitiveModules` | `List[Path]`     | Comma-separated list of filepaths that include new-line separated Maven module paths; will execute all transitively dependent Maven modules (up- or downstream) |
+| `multirts.upstreamModules`   | `List[Path]`     | Comma-separated list of filepaths that include new-line separated Maven module paths; will execute all transitive upstream Maven modules                        |
+| `multirts.downstreamModules` | `List[Path]`     | Comma-separated list of filepaths that include new-line separated Maven module paths; will execute all transitive downstream Maven modules                      |
+| `multirts.moduleOutput`      | `Optional[Path]` | Filepath where to write selected Maven modules (optional)                                                                                                       |
+| `multirts.filterExecution`   | `Boolean`        | Filter the Maven execution to the selected Maven modules; default: `false` (will only compute the set of modules, but not filter them)                          |

@@ -46,9 +46,9 @@ public class ModuleSelectionMojoTest {
         mojo.stripDirectories = newList("bla");
 
         // when
-        String result = mojo.buildModulesString(newSet(String.join(File.separator, "a", "b", "c", "pom.xml"), String.join(File.separator, "a", "b", "bla", "pom.xml")));
+        String result = mojo.buildModulesString(newList(String.join(File.separator, "a", "b", "c", "pom.xml"), String.join(File.separator, "a", "b", "bla", "pom.xml")));
 
         // then
-        assertEquals(result, String.join(File.separator, "a", "b", "c", "pom.xml") + "\n" + String.join(File.separator, "a", "b", "pom.xml") + "\n");
+        assertEquals(result, String.join(File.separator, "a", "b", "c", "pom.xml") + "\n" + String.join(File.separator, "a", "b", "pom.xml"));
     }
 }

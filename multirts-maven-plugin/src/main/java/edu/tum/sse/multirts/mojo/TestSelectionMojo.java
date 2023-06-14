@@ -34,7 +34,7 @@ import static edu.tum.sse.multirts.util.CollectionUtils.newSet;
 /**
  * This Mojo is used to perform change-based test selection.
  */
-@Mojo(name = "test-selection", defaultPhase = LifecyclePhase.VERIFY, threadSafe = true)
+@Mojo(name = "test-selection", defaultPhase = LifecyclePhase.VALIDATE, threadSafe = true, aggregator = true)
 public class TestSelectionMojo extends AbstractModuleTestSelectionMojo {
 
     private static final String CSV_SEPARATOR = ";";

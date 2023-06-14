@@ -125,8 +125,8 @@ public final class GitClient {
      * We don't use the {@link Git} object here, as it overcomplicates things for our use case.
      * Instead, we invoke "git diff" manually and ignore all pure whitespace changes as they're irrelevant for us.
      *
-     * @param fromRevision source commit hash for diff comparison
-     * @param toRevision   target commit hash for diff comparison
+     * @param fromRevision commit hash for diff comparison
+     * @param toRevision   commit hash for diff comparison
      * @return set of file paths
      */
     public Set<ChangeSetItem> getDiff(String fromRevision, String toRevision) {

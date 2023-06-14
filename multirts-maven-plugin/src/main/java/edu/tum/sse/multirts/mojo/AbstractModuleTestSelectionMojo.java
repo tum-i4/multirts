@@ -42,12 +42,12 @@ public abstract class AbstractModuleTestSelectionMojo extends AbstractMultiRTSMo
     String sourceRevision;
 
     GitClient getGitClient() {
-        return new GitClient(gitRepositoryRoot.toPath());
+        return new GitClient(gitRepositoryRoot.toPath().normalize().toAbsolutePath());
     }
 
     Set<ChangeSetItem> getChangeset(GitClient gitClient) {
         return gitClient
-                .getDiff(sourceRevision, targetRevision)
+                .getDiff(targetRevision, sourceRevision)  // results in: target...source; e.g., main...HEAD
                 .stream()
                 .filter(item -> item.getPath().toString().matches(fileFilter))
                 .collect(Collectors.toSet());
