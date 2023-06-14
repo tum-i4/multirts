@@ -1,6 +1,5 @@
 module-selection:
     modules:
-        baz/foobar/pom.xml
 
 test-selection:
     tests:
