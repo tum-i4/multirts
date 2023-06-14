@@ -26,14 +26,17 @@ public class BuildSystemAwareTestSelectionMediator {
     private static final List<String> COMPILE_TIME_EXTENSIONS = newList(".wsdl", ".xsd");
 
     private final MavenSession mavenSession;
+    private final Path repositoryRoot;
     private final TestSelectionStrategy testSelectionStrategy;
     private final Path mavenRoot;
     private Map<String, Path> lazyTestSuiteMapping = null;
 
     public BuildSystemAwareTestSelectionMediator(final Path mavenRoot,
+                                                 final Path repositoryRoot,
                                                  final TestSelectionStrategy testSelectionStrategy,
                                                  final MavenSession mavenSession) {
         this.mavenRoot = mavenRoot;
+        this.repositoryRoot = repositoryRoot;
         this.testSelectionStrategy = testSelectionStrategy;
         this.mavenSession = mavenSession;
     }
@@ -43,10 +46,10 @@ public class BuildSystemAwareTestSelectionMediator {
         for (ChangeSetItem item : changeSetItems) {
             if (item.getChangeType() != ChangeType.DELETED) {
                 if (PathUtils.hasFilename(item.getPath(), POM_XML)) {
-                    modifiedMavenProjectDirs.add(item.getPath().getParent());
+                    modifiedMavenProjectDirs.add(repositoryRoot.resolve(item.getPath().getParent()).toAbsolutePath());
                 } else if (PathUtils.hasAnyExtension(item.getPath(), COMPILE_TIME_EXTENSIONS)) {
                     Path parentPOM = findParentPOM(item.getPath().getParent());
-                    modifiedMavenProjectDirs.add(parentPOM.getParent());
+                    modifiedMavenProjectDirs.add(repositoryRoot.resolve(parentPOM.getParent()).toAbsolutePath());
                 }
             }
         }
