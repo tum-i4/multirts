@@ -1,7 +1,7 @@
 package edu.tum.sse.multirts.rts;
 
 import edu.tum.sse.jtec.reporting.TestSuite;
-import edu.tum.sse.multirts.modules.ModuleSelector;
+import edu.tum.sse.multirts.modules.MavenDependencyAnalyzer;
 import edu.tum.sse.multirts.parser.JavaSourceCodeParser;
 import edu.tum.sse.multirts.util.PathUtils;
 import edu.tum.sse.multirts.vcs.ChangeSetItem;
@@ -55,7 +55,7 @@ public class BuildSystemAwareTestSelectionMediator {
         }
         Set<SelectedTestSuite> preSelectedTestSuites = new HashSet<>();
         if (!modifiedMavenProjectDirs.isEmpty() && mavenSession != null) {
-            ModuleSelector moduleSelector = new ModuleSelector(mavenSession);
+            MavenDependencyAnalyzer moduleSelector = new MavenDependencyAnalyzer(mavenSession);
             // We need to select all transitive downstream modules, as a change in the build system configuration
             // (i.e. to Maven or any compile-time file) could potentially affect tests from downstream modules.
             moduleSelector.selectDownstreamModules(new ArrayList<>(modifiedMavenProjectDirs));

@@ -1,6 +1,5 @@
 package edu.tum.sse.multirts.ext;
 
-import edu.tum.sse.multirts.modules.ModuleSelector;
 import org.apache.maven.AbstractMavenLifecycleParticipant;
 import org.apache.maven.MavenExecutionException;
 import org.apache.maven.execution.MavenSession;

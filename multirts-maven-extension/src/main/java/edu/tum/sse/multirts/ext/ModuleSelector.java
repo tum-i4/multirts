@@ -1,4 +1,4 @@
-package edu.tum.sse.multirts.modules;
+package edu.tum.sse.multirts.ext;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;

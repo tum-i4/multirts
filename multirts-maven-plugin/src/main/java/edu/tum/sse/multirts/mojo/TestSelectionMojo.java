@@ -98,9 +98,8 @@ public class TestSelectionMojo extends AbstractModuleTestSelectionMojo {
         TestReport testReport;
         try {
             testReport = JSONUtils.fromJson(testReportFile.toPath(), TestReport.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new MojoFailureException("Invalid test report provided at " + testReportFile.getPath());
+        } catch (Exception e) {
+            throw new MojoFailureException("Failed to read test report.");
         }
         return testReport;
     }
@@ -136,9 +135,8 @@ public class TestSelectionMojo extends AbstractModuleTestSelectionMojo {
                 writeToFile(includedModules, String.join("\n", selectedModules), false, StandardOpenOption.TRUNCATE_EXISTING);
             }
         } catch (Exception exception) {
-            getLog().error("Failed to run MultiRTS module selection in project " + project.getName());
             exception.printStackTrace();
-            throw new MojoFailureException(exception.getMessage());
+            throw new MojoFailureException("Failed to run MultiRTS test selection in project " + project.getName() + " with error message: " + exception.getMessage());
         }
     }
 
