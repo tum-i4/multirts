@@ -21,8 +21,9 @@ class TestSelectionMojoTest {
         // given
         Path dllMapping1 = Paths.get(Objects.requireNonNull(getClass().getClassLoader().getResource("dll-mapping1.csv")).toURI());
         Path dllMapping2 = Paths.get(Objects.requireNonNull(getClass().getClassLoader().getResource("dll-mapping2.csv")).toURI());
+        Path dllMapping3 = Paths.get("dll-mapping3.csv");  // non-existing file should be ignored
         TestSelectionMojo mojo = new TestSelectionMojo();
-        mojo.additionalFileMappings = newList(dllMapping1.toFile(), dllMapping2.toFile());
+        mojo.additionalFileMappings = newList(dllMapping1.toFile(), dllMapping2.toFile(), dllMapping3.toFile());
         Map<String, Set<String>> expected = new HashMap<>();
         expected.put("/some/path/mb2cpp/proj-x/src/test.cpp", newSet("/some/other/path/lib_test.dll"));
         expected.put("/some/path/mb2cpp/proj-x/src/xxx.cpp", newSet("/some/other/path/lib_test.dll"));

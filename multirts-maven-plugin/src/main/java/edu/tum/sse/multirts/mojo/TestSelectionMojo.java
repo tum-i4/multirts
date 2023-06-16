@@ -69,23 +69,25 @@ public class TestSelectionMojo extends AbstractModuleTestSelectionMojo {
         Map<String, Set<String>> fileMapping = new HashMap<>();
         if (additionalFileMappings != null && !additionalFileMappings.isEmpty()) {
             for (File mappingFile : additionalFileMappings) {
-                try (Stream<String> lines = Files.lines(mappingFile.toPath())) {
-                    lines.filter(line -> line.contains(CSV_SEPARATOR))
-                            .forEach(line -> {
-                                String[] keyValuePair = line.split(CSV_SEPARATOR, 2);
-                                // NOTE: this is vice-versa to what one might expect.
-                                // The expected format is: "DLL;Source-file".
-                                String value = keyValuePair[0];
-                                String key = keyValuePair[1];
-                                if (fileMapping.containsKey(key)) {
-                                    fileMapping.get(key).add(value);
-                                } else {
-                                    fileMapping.put(key, newSet(value));
-                                }
-                            });
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    throw new MojoFailureException("Failed to read CSV file at " + mappingFile.getPath());
+                if (mappingFile.isFile()) {
+                    try (Stream<String> lines = Files.lines(mappingFile.toPath())) {
+                        lines.filter(line -> line.contains(CSV_SEPARATOR))
+                                .forEach(line -> {
+                                    String[] keyValuePair = line.split(CSV_SEPARATOR, 2);
+                                    // NOTE: this is vice-versa to what one might expect.
+                                    // The expected format is: "DLL;Source-file".
+                                    String value = keyValuePair[0];
+                                    String key = keyValuePair[1];
+                                    if (fileMapping.containsKey(key)) {
+                                        fileMapping.get(key).add(value);
+                                    } else {
+                                        fileMapping.put(key, newSet(value));
+                                    }
+                                });
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        throw new MojoFailureException("Failed to read CSV file at " + mappingFile.getPath());
+                    }
                 }
             }
         }
