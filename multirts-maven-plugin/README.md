@@ -24,6 +24,7 @@ the `-Dsurefire.includesFile` option.
 |---------------------------|-----------|----------------------------------------------------------------------------------------------------|
 | `multirts.debug`          | `Boolean` | Enables more verbose debug output                                                                  |
 | `multirts.git`            | `Path`    | Path to git repository root (default: Maven root project directory)                                |
+| `multirts.fileFilter`     | `String`  | Regex to filter files in changeset                                                                 |
 | `multirts.label`          | `String`  | Label which is used for naming generated file artifacts                                            |
 | `multirts.output`         | `Path`    | Output directory where to store generated file artifacts (default: target/.multirts)               |
 | `multirts.sourceRevision` | `String`  | The source revision (commit identifier or branch name) where the changes are currently versioned   |
