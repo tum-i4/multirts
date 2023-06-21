@@ -7,16 +7,16 @@
     <parent>
         <groupId>edu.tum.sse</groupId>
         <artifactId>multirts</artifactId>
-        <version>0.0.1</version>
+        <version>0.0.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>multirts-core</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2-SNAPSHOT</version>
     <name>MultiRTS Core Package</name>
     <packaging>jar</packaging>
 
     <properties>
-        <eclipse-jgit.version>5.11.0.202103091610-r</eclipse-jgit.version>
+        <eclipse-jgit.version>5.11.0.20210.0.2-SNAPSHOT610-r</eclipse-jgit.version>
         <javaparser.version>3.20.2</javaparser.version>
         <jtec.version>0.0.3</jtec.version>
         <junit5.version>5.7.0</junit5.version>
