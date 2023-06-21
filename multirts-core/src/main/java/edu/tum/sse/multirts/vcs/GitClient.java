@@ -31,7 +31,7 @@ public final class GitClient {
     };
     private final Path root;
 
-    private final Git gitRepo;
+    private Git gitRepo;
     // To prevent re-querying the git index, we cache the results from `git (show|diff)` commands.
     private final Map<String, String> showCache = new HashMap<>();
     private final Map<String, Set<ChangeSetItem>> diffCache = new HashMap<>();
@@ -41,7 +41,8 @@ public final class GitClient {
         try {
             gitRepo = Git.open(this.root.toFile());
         } catch (IOException e) {
-            throw new RuntimeException("Unable to initialize git repository at " + root);
+            gitRepo = null;
+            System.err.println("Unable to initialize git repository at " + root + ". May raise NPE for using JGit APIs.");
         }
     }
 
@@ -171,19 +172,21 @@ public final class GitClient {
      */
     public Set<ChangeSetItem> getStatus() throws GitAPIException {
         Set<ChangeSetItem> changeSet = new HashSet<>();
-        Status status = gitRepo.status().call();
-        changeSet.addAll(status.getAdded().stream()
-                .map((path) -> new ChangeSetItem(ChangeType.ADDED, Paths.get(path))).collect(Collectors.toSet()));
-        changeSet.addAll(status.getUntracked().stream()
-                .map((path) -> new ChangeSetItem(ChangeType.ADDED, Paths.get(path))).collect(Collectors.toSet()));
-        changeSet.addAll(status.getModified().stream()
-                .map((path) -> new ChangeSetItem(ChangeType.MODIFIED, Paths.get(path))).collect(Collectors.toSet()));
-        changeSet.addAll(status.getChanged().stream()
-                .map((path) -> new ChangeSetItem(ChangeType.MODIFIED, Paths.get(path))).collect(Collectors.toSet()));
-        changeSet.addAll(status.getRemoved().stream()
-                .map((path) -> new ChangeSetItem(ChangeType.DELETED, Paths.get(path))).collect(Collectors.toSet()));
-        changeSet.addAll(status.getChanged().stream()
-                .map((path) -> new ChangeSetItem(ChangeType.DELETED, Paths.get(path))).collect(Collectors.toSet()));
+        if (gitRepo != null) {
+            Status status = gitRepo.status().call();
+            changeSet.addAll(status.getAdded().stream()
+                    .map((path) -> new ChangeSetItem(ChangeType.ADDED, Paths.get(path))).collect(Collectors.toSet()));
+            changeSet.addAll(status.getUntracked().stream()
+                    .map((path) -> new ChangeSetItem(ChangeType.ADDED, Paths.get(path))).collect(Collectors.toSet()));
+            changeSet.addAll(status.getModified().stream()
+                    .map((path) -> new ChangeSetItem(ChangeType.MODIFIED, Paths.get(path))).collect(Collectors.toSet()));
+            changeSet.addAll(status.getChanged().stream()
+                    .map((path) -> new ChangeSetItem(ChangeType.MODIFIED, Paths.get(path))).collect(Collectors.toSet()));
+            changeSet.addAll(status.getRemoved().stream()
+                    .map((path) -> new ChangeSetItem(ChangeType.DELETED, Paths.get(path))).collect(Collectors.toSet()));
+            changeSet.addAll(status.getChanged().stream()
+                    .map((path) -> new ChangeSetItem(ChangeType.DELETED, Paths.get(path))).collect(Collectors.toSet()));
+        }
         return changeSet;
     }
 }
