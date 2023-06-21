@@ -44,6 +44,6 @@ jobs:
 
     - name: Publish to GitHub Packages Apache Maven
       if: ${{ startsWith(github.ref, 'refs/tags/') && matrix.os == 'ubuntu-latest' && matrix.java-version == '11' }}
-      run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml -DskipTests
+      run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml -Pgithub -DskipTests
       env:
         GITHUB_TOKEN: ${{ github.token }}
