@@ -44,14 +44,14 @@ Therefore, the simplest way to use MultiRTS in a Maven project is through the Ma
         <plugin>
             <groupId>edu.tum.sse</groupId>
             <artifactId>multirts-maven-extension</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.0.1</version>
             <extensions>true</extensions>
         </plugin>
         <!-- The plugin provides goals for module and test selection. -->
         <plugin>
             <groupId>edu.tum.sse</groupId>
             <artifactId>multirts-maven-plugin</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.0.1</version>
         </plugin>
     </plugins>
 </build>

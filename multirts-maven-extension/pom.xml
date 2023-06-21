@@ -7,11 +7,11 @@
     <parent>
         <groupId>edu.tum.sse</groupId>
         <artifactId>multirts</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.1</version>
     </parent>
 
     <artifactId>multirts-maven-extension</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <name>MultiRTS Maven Extension</name>
     <properties>
         <maven.version>3.6.3</maven.version>
