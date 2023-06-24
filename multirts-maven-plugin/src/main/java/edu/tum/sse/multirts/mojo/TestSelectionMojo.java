@@ -128,11 +128,14 @@ public class TestSelectionMojo extends AbstractModuleTestSelectionMojo {
                 Path includedTests = outputDirectory.toPath().resolve(getLabel()).resolve(TESTS_INCLUDED_FILE);
                 createFileAndEnclosingDir(includedTests);
                 writeToFile(includedTests, selectedTestSuites, false, StandardOpenOption.TRUNCATE_EXISTING);
+                log("Selected tests: " + selectedTestSuites);
                 // Select modules for tests.
                 Set<String> selectedModules = mediator.getModulesForTests(testSelectionResult.getSelectedTestSuites());
                 Path includedModules = outputDirectory.toPath().resolve(getLabel()).resolve(MODULE_FILE);
                 createFileAndEnclosingDir(includedModules);
-                writeToFile(includedModules, String.join("\n", selectedModules), false, StandardOpenOption.TRUNCATE_EXISTING);
+                String selectedTestModules = String.join("\n", selectedModules);
+                log("Selected modules for tests: " + selectedTestModules);
+                writeToFile(includedModules, selectedTestModules, false, StandardOpenOption.TRUNCATE_EXISTING);
             }
         } catch (Exception exception) {
             exception.printStackTrace();
