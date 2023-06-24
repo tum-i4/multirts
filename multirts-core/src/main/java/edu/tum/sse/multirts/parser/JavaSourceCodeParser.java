@@ -1,24 +1,22 @@
 package edu.tum.sse.multirts.parser;
 
-import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.AnnotationDeclaration;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.EnumDeclaration;
-import com.github.javaparser.ast.body.TypeDeclaration;
 import edu.tum.sse.jtec.util.IOUtils;
+import edu.tum.sse.multirts.util.CollectionUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
+/**
+ * Facilities to parse Java source code.
+ * We rely on regex-based parsing which is generally more robust across Java versions-
+ */
 public class JavaSourceCodeParser {
-
     // Regex based on Maven Surefire:
     // https://maven.apache.org/surefire/maven-surefire-plugin/examples/inclusion-exclusion.html
     public static String TEST_FILE_PATTERN = "(Test.*|.*Test|TestCase.*|.*TestCase|.*Tests).java";
@@ -39,25 +37,8 @@ public class JavaSourceCodeParser {
     }
 
     public static Set<String> getAllFullyQualifiedTypeNames(final String code) {
-        // TODO: we could also just return the top-level types here (getTypes())
-        CompilationUnit compilationUnit = StaticJavaParser.parse(code);
-        Stream<Optional<String>> typeStream = Stream.concat(Stream.concat(
-                        compilationUnit
-                                .findAll(ClassOrInterfaceDeclaration.class)
-                                .stream()
-                                .map(TypeDeclaration::getFullyQualifiedName),
-                        compilationUnit
-                                .findAll(EnumDeclaration.class)
-                                .stream()
-                                .map(TypeDeclaration::getFullyQualifiedName)
-                ),
-                compilationUnit
-                        .findAll(AnnotationDeclaration.class)
-                        .stream()
-                        .map(TypeDeclaration::getFullyQualifiedName));
-        return typeStream.filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toSet());
+        JavaSourceFile file = new JavaSourceFile(code);
+        return file.getAllFullyQualifiedTypeNames();
     }
 
     public static Set<String> getAllFullyQualifiedTypeNames(final Path path) throws IOException {
@@ -65,10 +46,66 @@ public class JavaSourceCodeParser {
     }
 
     public static String getFullyQualifiedTypeName(Path path) throws IOException {
-        CompilationUnit compilationUnit = StaticJavaParser.parse(path);
-        if (!compilationUnit.getPrimaryTypeName().isPresent() || !compilationUnit.getPackageDeclaration().isPresent()) {
-            throw new RuntimeException("Could not determine package and class name for file " + path.toString());
+        JavaSourceFile file = new JavaSourceFile(IOUtils.readFromFile(path), path);
+        return file.getPackage() + "." + file.getPrimaryTypeName();
+    }
+
+    static class JavaSourceFile {
+        final static String typeRegex = ".*?(?:class|interface|enum)\\s+([a-zA-Z_$][a-zA-Z\\d_$]*).*?";
+        final static Pattern typePattern = Pattern.compile(typeRegex, Pattern.MULTILINE);
+        final static String packageRegex = "package\\s+(\\S*)\\s*;";
+        final static Pattern packagePattern = Pattern.compile(packageRegex, Pattern.MULTILINE);
+        final String code;
+        final Path path;
+        private String packageName = "";
+        private String primaryTypeName = "";
+
+        JavaSourceFile(String code) {
+            this(code, null);
         }
-        return compilationUnit.getPackageDeclaration().get().getName() + "." + compilationUnit.getPrimaryTypeName().get();
+
+        JavaSourceFile(String code, Path path) {
+            this.code = code;
+            this.path = path;
+        }
+
+        String getPackage() {
+            if (packageName.isEmpty()) {
+                final Matcher matcher = packagePattern.matcher(code);
+                if (matcher.find() && matcher.groupCount() >= 1) {
+                    packageName = matcher.group(1);
+                } else {
+                    throw new RuntimeException("Invalid Java source file without valid package found.");
+                }
+            }
+            return packageName;
+        }
+
+        Set<String> getAllFullyQualifiedTypeNames() {
+            final Matcher matcher = typePattern.matcher(code);
+            final Set<String> names = CollectionUtils.newSet();
+            while (matcher.find()) {
+                for (int i = 1; i <= matcher.groupCount(); i++) {
+                    names.add(getPackage() + "." + matcher.group(i)); // TODO replace . with / ?
+                }
+            }
+            return names;
+        }
+
+        String getPrimaryTypeName() {
+            if (primaryTypeName.isEmpty()) {
+                if (path != null) {
+                    primaryTypeName = path.getFileName().toString().split("\\.java")[0]; // TODO
+                } else {
+                    final Matcher matcher = typePattern.matcher(code);
+                    if (matcher.find() && matcher.groupCount() >= 1) {
+                        primaryTypeName = matcher.group(1);
+                    } else {
+                        throw new RuntimeException("Invalid Java source file without valid type found.");
+                    }
+                }
+            }
+            return primaryTypeName;
+        }
     }
 }

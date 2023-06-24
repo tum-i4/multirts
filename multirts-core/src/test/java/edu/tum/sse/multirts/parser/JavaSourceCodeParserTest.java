@@ -60,7 +60,7 @@ class JavaSourceCodeParserTest {
                 "interface D {}\n" +
                 "class B { class C {} static class F {} }\n" +
                 "enum E {}";
-        final Set<String> expected = Stream.of("a.b.c.A", "a.b.c.D", "a.b.c.B", "a.b.c.B.C", "a.b.c.B.F", "a.b.c.E")
+        final Set<String> expected = Stream.of("a.b.c.A", "a.b.c.D", "a.b.c.B", "a.b.c.C", "a.b.c.F", "a.b.c.E")
                 .collect(Collectors.toSet());
 
         // when
@@ -74,7 +74,7 @@ class JavaSourceCodeParserTest {
     void shouldFindAllTypesFromFile() throws IOException, URISyntaxException {
         // given
         final Path javaFile = Paths.get(Objects.requireNonNull(getClass().getClassLoader().getResource("Sample.java")).toURI());
-        final Set<String> expected = Stream.of("foo.Sample.Bar", "foo.Anno", "foo.Sample.X", "foo.Sample.Y", "foo.Sample", "foo.Sample.Foo", "foo.Bar")
+        final Set<String> expected = Stream.of("foo.Bar", "foo.Anno", "foo.X", "foo.Y", "foo.Sample", "foo.Foo", "foo.Bar")
                 .collect(Collectors.toSet());
 
         // when
