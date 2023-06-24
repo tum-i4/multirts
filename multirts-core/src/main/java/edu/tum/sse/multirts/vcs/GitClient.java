@@ -1,13 +1,14 @@
 package edu.tum.sse.multirts.vcs;
 
-import edu.tum.sse.jtec.util.ProcessUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.DiffInterruptedException;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -15,8 +16,6 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static edu.tum.sse.multirts.util.StringUtils.collectAllLines;
 
 public final class GitClient {
     private final static Pattern diffPattern = Pattern.compile("^diff --git a/(.*) b/.*$");
@@ -30,11 +29,10 @@ public final class GitClient {
             "--ignore-all-space",
     };
     private final Path root;
-
-    private Git gitRepo;
     // To prevent re-querying the git index, we cache the results from `git (show|diff)` commands.
     private final Map<String, String> showCache = new HashMap<>();
     private final Map<String, Set<ChangeSetItem>> diffCache = new HashMap<>();
+    private Git gitRepo;
 
     public GitClient(final Path root) {
         this.root = root.toAbsolutePath();
@@ -55,6 +53,22 @@ public final class GitClient {
         return root;
     }
 
+    private List<String> runProcessAndReturnOutput(String command) throws IOException, InterruptedException {
+        Process process = Runtime.getRuntime().exec(command);
+        BufferedReader reader =
+                new BufferedReader(new InputStreamReader(process.getInputStream()));
+        List<String> lines = new ArrayList<>();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            lines.add(line);
+        }
+        process.waitFor();
+        if (process.exitValue() != 0) {
+            throw new RuntimeException("Failed to execute command " + command);
+        }
+        return lines;
+    }
+
     /**
      * Queries the index for the content of the file {@code path} at a given {@code revision}.
      *
@@ -70,21 +84,15 @@ public final class GitClient {
         if (showCache.containsKey(gitObject))
             return showCache.get(gitObject);
         final String command = String.format(
-                "git -C %s show %s",
+                "git -P -C %s show %s",
                 root.toString(),
                 gitObject
         );
         String content = "";
         try {
-            Process proc = ProcessUtils.run(
-                    command,
-                    true
-            );
-            if (proc.exitValue() != 0) {
-                throw new RuntimeException("Failed to execute command " + command);
-            }
+            List<String> lines = runProcessAndReturnOutput(command);
             // TODO: check if this works when BOM is present
-            content = collectAllLines(proc.getInputStream()).stream().collect(Collectors.joining(System.lineSeparator()));
+            content = lines.stream().collect(Collectors.joining(System.lineSeparator()));
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to execute command " + command + " with exception: " + e.getMessage());
@@ -140,21 +148,15 @@ public final class GitClient {
         // The reason we don't simply use --name-status or --name-only is that these options are
         // incompatible with ignoring only whitespace changes (which we would then still need to filter out).
         final String command = String.format(
-                "git -C %s diff %s %s",
+                "git -P -C %s diff %s %s",
                 root.toString(),
                 String.join(" ", diffOptions),
                 diffRange
         );
         final Set<ChangeSetItem> diffItems;
         try {
-            Process proc = ProcessUtils.run(
-                    command,
-                    true
-            );
-            if (proc.exitValue() != 0) {
-                throw new DiffInterruptedException(collectAllLines(proc.getInputStream()).stream().collect(Collectors.joining(System.lineSeparator())));
-            }
-            diffItems = parseDiffOutput(collectAllLines(proc.getInputStream()));
+            List<String> lines = runProcessAndReturnOutput(command);
+            diffItems = parseDiffOutput(lines);
         } catch (Exception e) {
             e.printStackTrace();
             throw new DiffInterruptedException("Failed to execute command " + command + " with exception: " + e.getMessage());
