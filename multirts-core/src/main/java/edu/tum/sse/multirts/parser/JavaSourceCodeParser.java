@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -22,10 +23,12 @@ public class JavaSourceCodeParser {
     public static String TEST_FILE_PATTERN = "(Test.*|.*Test|TestCase.*|.*TestCase|.*Tests).java";
 
     public static Set<Path> findAllJavaTestFiles(Path root) throws IOException {
-        return Files.find(root,
+        try (Stream<Path> paths = Files.find(root,
                 Integer.MAX_VALUE,
                 (path, basicFileAttributes) -> isTestFile(path)
-        ).collect(Collectors.toSet());
+        )) {
+            return paths.collect(Collectors.toSet());
+        }
     }
 
     public static boolean isJavaFile(final Path path) {
@@ -48,6 +51,10 @@ public class JavaSourceCodeParser {
     public static String getFullyQualifiedTypeName(Path path) throws IOException {
         JavaSourceFile file = new JavaSourceFile(IOUtils.readFromFile(path), path);
         return file.getPackage() + "." + file.getPrimaryTypeName();
+    }
+
+    public static String getPrimaryTypeName(Path path) {
+        return path.getFileName().toString().split("\\.java")[0];
     }
 
     static class JavaSourceFile {

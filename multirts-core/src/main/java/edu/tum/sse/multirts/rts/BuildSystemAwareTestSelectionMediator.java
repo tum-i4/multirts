@@ -2,7 +2,6 @@ package edu.tum.sse.multirts.rts;
 
 import edu.tum.sse.jtec.reporting.TestSuite;
 import edu.tum.sse.multirts.modules.MavenDependencyAnalyzer;
-import edu.tum.sse.multirts.parser.JavaSourceCodeParser;
 import edu.tum.sse.multirts.util.PathUtils;
 import edu.tum.sse.multirts.vcs.ChangeSetItem;
 import edu.tum.sse.multirts.vcs.ChangeType;
@@ -29,7 +28,7 @@ public class BuildSystemAwareTestSelectionMediator {
     private final Path repositoryRoot;
     private final TestSelectionStrategy testSelectionStrategy;
     private final Path mavenRoot;
-    private Map<String, Path> lazyTestSuiteMapping = null;
+    private TestSuiteFileMap lazyTestSuiteMapping = null;
 
     public BuildSystemAwareTestSelectionMediator(final Path mavenRoot,
                                                  final Path repositoryRoot,
@@ -61,11 +60,7 @@ public class BuildSystemAwareTestSelectionMediator {
             moduleSelector.selectDownstreamModules(new ArrayList<>(modifiedMavenProjectDirs));
             for (MavenProject project : moduleSelector.getSelectedProjects()) {
                 Set<String> testSuiteNames = getTestSuiteMapping()
-                        .entrySet()
-                        .stream()
-                        .filter(entry -> entry.getValue().toAbsolutePath().toString().contains(project.getBasedir().getPath()))
-                        .map(Map.Entry::getKey)
-                        .collect(Collectors.toSet());
+                        .getAllTestsInPath(project.getBasedir().getPath());
                 for (String testSuiteName : testSuiteNames) {
                     TestSuite testSuite = new TestSuite();
                     testSuite.setTestId(testSuiteName);
@@ -79,28 +74,23 @@ public class BuildSystemAwareTestSelectionMediator {
     public Set<String> getModulesForTests(List<SelectedTestSuite> selectedTestSuites) throws IOException {
         Set<String> mavenModules = new HashSet<>();
         for (SelectedTestSuite testSuite : selectedTestSuites) {
-            if (getTestSuiteMapping().containsKey(testSuite.getTestSuite().getTestId())) {
-                Path testSuiteParentPOM = findParentPOM(getTestSuiteMapping().get(testSuite.getTestSuite().getTestId()).getParent());
+            Optional<Path> testFile = getTestSuiteMapping().getFile(testSuite.getTestSuite().getTestId());
+            if (testFile.isPresent()) {
+                Path testSuiteParentPOM = findParentPOM(testFile.get().getParent());
                 mavenModules.add(mavenRoot.relativize(testSuiteParentPOM).toString());
             }
         }
         return mavenModules;
     }
 
-    private Map<String, Path> getTestSuiteMapping() throws IOException {
+    private TestSuiteFileMap getTestSuiteMapping() throws IOException {
         if (lazyTestSuiteMapping == null) {
             lazyTestSuiteMapping = getTestSuiteMapping(mavenRoot);
         }
         return lazyTestSuiteMapping;
     }
 
-    private Map<String, Path> getTestSuiteMapping(Path path) throws IOException {
-        Set<Path> testFiles = JavaSourceCodeParser.findAllJavaTestFiles(path);
-        Map<String, Path> testSuiteMapping = new HashMap<>();
-        for (Path testFile : testFiles) {
-            String testSuiteName = JavaSourceCodeParser.getFullyQualifiedTypeName(testFile);
-            testSuiteMapping.put(testSuiteName, testFile);
-        }
-        return testSuiteMapping;
+    private TestSuiteFileMap getTestSuiteMapping(Path path) {
+        return new TestSuiteFileMap(path);
     }
 }
