@@ -58,9 +58,9 @@ class BuildSystemAwareTestSelectionMediatorTest {
                 testSelectionStrategy,
                 mavenSession);
         TestSuite testSuite1 = new TestSuite();
-        testSuite1.setTestId("a.b.c.e.TestE");
+        testSuite1.setTestId("TestE"); // a.b.c.e.TestE
         TestSuite testSuite2 = new TestSuite();
-        testSuite2.setTestId("a.b.c.h.TestH");
+        testSuite2.setTestId("TestH"); // a.b.c.h.TestH
 
         // when
         mediator.executeTestSelection(newSet(new ChangeSetItem(ChangeType.MODIFIED, sampleProjectRoot.resolve("h/pom.xml"))));
@@ -108,9 +108,9 @@ class BuildSystemAwareTestSelectionMediatorTest {
                 testSelectionStrategy,
                 mavenSession);
         TestSuite testSuite1 = new TestSuite();
-        testSuite1.setTestId("a.b.c.e.TestE");
+        testSuite1.setTestId("TestE"); // a.b.c.e.TestE
         TestSuite testSuite2 = new TestSuite();
-        testSuite2.setTestId("a.b.c.h.TestH");
+        testSuite2.setTestId("TestH"); // a.b.c.h.TestH
 
         // when
         mediator.executeTestSelection(newSet(new ChangeSetItem(ChangeType.MODIFIED, sampleProjectRoot.resolve("h/src/main/test.wsdl"))));

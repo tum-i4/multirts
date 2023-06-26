@@ -96,11 +96,16 @@ public class TestSelectionMojo extends AbstractModuleTestSelectionMojo {
 
     TestReport readReport() throws MojoFailureException {
         TestReport testReport;
+        long start = System.nanoTime();
         try {
             testReport = JSONUtils.fromJson(testReportFile.toPath(), TestReport.class);
         } catch (Exception e) {
-            throw new MojoFailureException("Failed to read test report.");
+            e.printStackTrace();
+            throw new MojoFailureException("Failed to read test report: " + e.getMessage());
         }
+        long finish = System.nanoTime();
+        long timeElapsed = (finish - start) / 1_000_000;
+        log("Finished reading test report in " + timeElapsed + "ms for report with " + testReport.getTestSuites().size() + " test suites.");
         return testReport;
     }
 
@@ -108,8 +113,8 @@ public class TestSelectionMojo extends AbstractModuleTestSelectionMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             if (session.getCurrentProject().isExecutionRoot()) {
-                GitClient gitClient = getGitClient();
                 TestReport testReport = readReport();
+                GitClient gitClient = getGitClient();
                 Map<String, Set<String>> fileMapping = readFileMapping();
                 TestSelectionStrategy rtsStrategy = new FileLevelTestSelection(testReport, gitClient, targetRevision, fileMapping);
                 BuildSystemAwareTestSelectionMediator mediator = new BuildSystemAwareTestSelectionMediator(
@@ -128,11 +133,14 @@ public class TestSelectionMojo extends AbstractModuleTestSelectionMojo {
                 Path includedTests = outputDirectory.toPath().resolve(getLabel()).resolve(TESTS_INCLUDED_FILE);
                 createFileAndEnclosingDir(includedTests);
                 writeToFile(includedTests, selectedTestSuites, false, StandardOpenOption.TRUNCATE_EXISTING);
+                log("Selected tests: " + selectedTestSuites);
                 // Select modules for tests.
                 Set<String> selectedModules = mediator.getModulesForTests(testSelectionResult.getSelectedTestSuites());
                 Path includedModules = outputDirectory.toPath().resolve(getLabel()).resolve(MODULE_FILE);
                 createFileAndEnclosingDir(includedModules);
-                writeToFile(includedModules, String.join("\n", selectedModules), false, StandardOpenOption.TRUNCATE_EXISTING);
+                String selectedTestModules = String.join("\n", selectedModules);
+                log("Selected modules for tests: " + selectedTestModules);
+                writeToFile(includedModules, selectedTestModules, false, StandardOpenOption.TRUNCATE_EXISTING);
             }
         } catch (Exception exception) {
             exception.printStackTrace();
