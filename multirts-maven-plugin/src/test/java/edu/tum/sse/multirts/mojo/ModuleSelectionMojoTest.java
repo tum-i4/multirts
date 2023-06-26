@@ -49,6 +49,6 @@ public class ModuleSelectionMojoTest {
         String result = mojo.buildModulesString(newList(String.join(File.separator, "a", "b", "c", "pom.xml"), String.join(File.separator, "a", "b", "bla", "pom.xml")));
 
         // then
-        assertEquals(result, String.join(File.separator, "a", "b", "c", "pom.xml") + "\n" + String.join(File.separator, "a", "b", "pom.xml"));
+        assertEquals(result, String.join(File.separator, "a", "b", "c", "pom.xml") + System.lineSeparator() + String.join(File.separator, "a", "b", "pom.xml"));
     }
 }

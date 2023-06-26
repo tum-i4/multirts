@@ -72,7 +72,7 @@ public class ModuleSelectionMojo extends AbstractModuleTestSelectionMojo {
                 }
             }
         }
-        return String.join("\n", selectedModules);
+        return String.join(System.lineSeparator(), selectedModules);
     }
 
     @Override

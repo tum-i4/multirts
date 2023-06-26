@@ -125,10 +125,10 @@ public class TestSelectionMojo extends AbstractModuleTestSelectionMojo {
                 );
                 // Select tests.
                 TestSelectionResult testSelectionResult = mediator.executeTestSelection(getChangeset(gitClient));
-                String selectedTestSuites = toTestSuites(testSelectionResult.getSelectedTestSuites()).stream().map(TestSuite::getTestId).collect(Collectors.joining("\n"));
+                String selectedTestSuites = toTestSuites(testSelectionResult.getSelectedTestSuites()).stream().map(TestSuite::getTestId).collect(Collectors.joining(System.lineSeparator()));
                 // In case any tests have been selected, we add the additionally included tests.
                 if (!testSelectionResult.getSelectedTestSuites().isEmpty()) {
-                    selectedTestSuites = selectedTestSuites + "\n" + String.join("\n", additionalIncludedTests);
+                    selectedTestSuites = selectedTestSuites + System.lineSeparator() + String.join(System.lineSeparator(), additionalIncludedTests);
                 }
                 Path includedTests = outputDirectory.toPath().resolve(getLabel()).resolve(TESTS_INCLUDED_FILE);
                 createFileAndEnclosingDir(includedTests);
@@ -138,7 +138,7 @@ public class TestSelectionMojo extends AbstractModuleTestSelectionMojo {
                 Set<String> selectedModules = mediator.getModulesForTests(testSelectionResult.getSelectedTestSuites());
                 Path includedModules = outputDirectory.toPath().resolve(getLabel()).resolve(MODULE_FILE);
                 createFileAndEnclosingDir(includedModules);
-                String selectedTestModules = String.join("\n", selectedModules);
+                String selectedTestModules = String.join( System.lineSeparator(), selectedModules);
                 log("Selected modules for tests: " + selectedTestModules);
                 writeToFile(includedModules, selectedTestModules, false, StandardOpenOption.TRUNCATE_EXISTING);
             }

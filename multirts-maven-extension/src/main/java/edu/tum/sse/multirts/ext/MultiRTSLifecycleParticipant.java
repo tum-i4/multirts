@@ -67,7 +67,7 @@ public class MultiRTSLifecycleParticipant extends AbstractMavenLifecycleParticip
             String projectList = selectedProjects.stream()
                     .map(project -> project.getBasedir().getAbsolutePath())
                     .sorted()
-                    .collect(Collectors.joining("\n"));
+                    .collect(Collectors.joining(System.lineSeparator()));
             Files.write(outputFile,
                     projectList.getBytes(),
                     StandardOpenOption.CREATE,
@@ -112,7 +112,7 @@ public class MultiRTSLifecycleParticipant extends AbstractMavenLifecycleParticip
 
     private void printSelectedModules(Set<MavenProject> selectedProjects) {
         System.out.println("--------------");
-        System.out.println(selectedProjects.stream().map(MavenProject::getName).sorted().collect(Collectors.joining("\n")));
+        System.out.println(selectedProjects.stream().map(MavenProject::getName).sorted().collect(Collectors.joining(System.lineSeparator())));
         System.out.println("--------------");
     }
 
