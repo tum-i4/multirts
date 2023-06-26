@@ -33,7 +33,9 @@ public class TestSuiteFileMap {
                 String testSuiteName = JavaSourceCodeParser.getPrimaryTypeName(testFile);
                 if (alreadySeenTestSuiteNames.contains(testSuiteName)) {
                     Path existingFile = testSuiteNameMapping.remove(testSuiteName);
-                    testSuiteIdentifierMapping.put(JavaSourceCodeParser.getFullyQualifiedTypeName(existingFile), existingFile);
+                    if (existingFile != null) {
+                        testSuiteIdentifierMapping.put(JavaSourceCodeParser.getFullyQualifiedTypeName(existingFile), existingFile);
+                    }
                     testSuiteIdentifierMapping.put(JavaSourceCodeParser.getFullyQualifiedTypeName(testFile), testFile);
                 } else {
                     testSuiteNameMapping.put(testSuiteName, testFile);
