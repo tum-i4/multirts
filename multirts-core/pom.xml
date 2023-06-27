@@ -17,7 +17,7 @@
 
     <properties>
         <eclipse-jgit.version>5.11.0.202103091610-r</eclipse-jgit.version>
-        <jtec.version>0.0.3</jtec.version>
+        <jtec.version>0.0.4</jtec.version>
         <junit5.version>5.7.0</junit5.version>
         <maven-core.version>3.8.5</maven-core.version>
         <mockito.version>4.5.1</mockito.version>

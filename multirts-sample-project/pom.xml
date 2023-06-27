@@ -16,7 +16,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <jtec.version>0.0.3</jtec.version>
+        <jtec.version>0.0.4</jtec.version>
         <multirts.version>0.0.1-SNAPSHOT</multirts.version>
         <junit.version>5.8.2</junit.version>
     </properties>
