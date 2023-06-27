@@ -52,7 +52,9 @@ public class ModuleSelectionMojo extends AbstractModuleTestSelectionMojo {
                 Set<String> selectedModules = moduleSelection.execute(changeSet);
                 Path includedModules = outputDirectory.toPath().resolve(getLabel()).resolve(MODULE_FILE);
                 createFileAndEnclosingDir(includedModules);
-                writeToFile(includedModules, buildModulesString(new ArrayList<>(selectedModules)), false, StandardOpenOption.TRUNCATE_EXISTING);
+                String selectedModulesString = buildModulesString(new ArrayList<>(selectedModules));
+                log("Selected modules: " + selectedModulesString);
+                writeToFile(includedModules, selectedModulesString, false, StandardOpenOption.TRUNCATE_EXISTING);
             }
         } catch (final Exception exception) {
             getLog().error("Failed to run MultiRTS module selection in project " + project.getName());
