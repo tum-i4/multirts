@@ -25,7 +25,7 @@ public class JavaSourceCodeParser {
     public static Set<Path> findAllJavaTestFiles(Path root) throws IOException {
         try (Stream<Path> paths = Files.find(root,
                 Integer.MAX_VALUE,
-                (path, basicFileAttributes) -> isTestFile(path)
+                (path, basicFileAttributes) -> basicFileAttributes.isRegularFile() && isTestFile(path)
         )) {
             return paths.collect(Collectors.toSet());
         }
@@ -36,7 +36,7 @@ public class JavaSourceCodeParser {
     }
 
     public static boolean isTestFile(final Path path) {
-        return path.toFile().getName().matches(TEST_FILE_PATTERN);
+        return path.getFileName().toString().matches(TEST_FILE_PATTERN);
     }
 
     public static Set<String> getAllFullyQualifiedTypeNames(final String code) {
