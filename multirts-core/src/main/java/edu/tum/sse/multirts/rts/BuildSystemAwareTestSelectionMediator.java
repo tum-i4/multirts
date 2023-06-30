@@ -60,7 +60,7 @@ public class BuildSystemAwareTestSelectionMediator {
             moduleSelector.selectDownstreamModules(new ArrayList<>(modifiedMavenProjectDirs));
             for (MavenProject project : moduleSelector.getSelectedProjects()) {
                 Set<String> testSuiteNames = getTestSuiteMapping()
-                        .getAllTestsInPath(project.getBasedir().getPath());
+                        .getAllTestsInPath(project.getBasedir().toPath());
                 for (String testSuiteName : testSuiteNames) {
                     TestSuite testSuite = new TestSuite();
                     testSuite.setTestId(testSuiteName);

@@ -52,7 +52,7 @@ public class TestSuiteFileMap {
         return Optional.ofNullable(testSuiteNameMapping.getOrDefault(testSuiteName, testSuiteIdentifierMapping.getOrDefault(testSuiteIdentifier, null)));
     }
 
-    public Set<String> getAllTestsInPath(String parent) {
+    public Set<String> getAllTestsInPath(Path parent) {
         return Stream.concat(
                         testSuiteNameMapping
                                 .entrySet()
@@ -61,7 +61,7 @@ public class TestSuiteFileMap {
                                 .entrySet()
                                 .stream()
                 )
-                .filter(entry -> entry.getValue().toAbsolutePath().toString().contains(parent))
+                .filter(entry -> entry.getValue().toAbsolutePath().startsWith(parent))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
     }
