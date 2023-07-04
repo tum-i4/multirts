@@ -82,7 +82,7 @@ public class JavaSourceCodeParser {
                 if (matcher.find() && matcher.groupCount() >= 1) {
                     packageName = matcher.group(1);
                 } else {
-                    throw new RuntimeException("Invalid Java source file without valid package found.");
+                    throw new RuntimeException("Invalid Java source file without valid package found: " + (path != null ? this.path : this.code));
                 }
             }
             return packageName;
