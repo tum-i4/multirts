@@ -91,6 +91,7 @@ public class BuildSystemAwareTestSelectionMediator {
     }
 
     private TestSuiteFileMap getTestSuiteMapping(Path path) {
-        return new TestSuiteFileMap(path);
+        // FIXME: We could further optimize by not using the full identifier here.
+        return new TestSuiteFileMap(path, true);
     }
 }

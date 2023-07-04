@@ -10,8 +10,7 @@ import java.util.stream.Stream;
 
 /**
  * Keeps track of a test suite->file path mapping.
- * This enables faster lookups as full test suite names are lazily determined with minimal effort
- * (e.g. by avoiding parsing files where possible).
+ * Avoids parsing files where possible.
  */
 public class TestSuiteFileMap {
     final Map<String, Path> testSuiteNameMapping = new HashMap<>();
@@ -19,15 +18,36 @@ public class TestSuiteFileMap {
     final Path root;
     Set<Path> testFiles = new HashSet<>();
 
+    /**
+     * If enabled, will always parse the files to find the
+     * full identifier of the test suite (including package name).
+     * This is slower but may be desired.
+     */
+    boolean useFullIdentifier;
+
+    public TestSuiteFileMap(Path root, boolean useFullIdentifier) {
+        this.root = root;
+        this.useFullIdentifier = useFullIdentifier;
+        populate();
+    }
 
     public TestSuiteFileMap(Path root) {
-        this.root = root;
-        populate();
+        this(root, false);
+    }
+
+    private void populateWithFullIdentifier() throws IOException {
+        for (Path testFile : testFiles) {
+            testSuiteIdentifierMapping.put(JavaSourceCodeParser.getFullyQualifiedTypeName(testFile), testFile);
+        }
     }
 
     private void populate() {
         try {
             testFiles = JavaSourceCodeParser.findAllJavaTestFiles(root);
+            if (useFullIdentifier) {
+                populateWithFullIdentifier();
+                return;
+            }
             Set<String> alreadySeenTestSuiteNames = new HashSet<>(testFiles.size());
             for (Path testFile : testFiles) {
                 String testSuiteName = JavaSourceCodeParser.getPrimaryTypeName(testFile);
@@ -48,19 +68,30 @@ public class TestSuiteFileMap {
     }
 
     Optional<Path> getFile(String testSuiteIdentifier) {
+        if (useFullIdentifier) {
+            return Optional.ofNullable(testSuiteIdentifierMapping.getOrDefault(testSuiteIdentifier, null));
+        }
         String testSuiteName = testSuiteIdentifier.substring(testSuiteIdentifier.lastIndexOf(".") + 1);
         return Optional.ofNullable(testSuiteNameMapping.getOrDefault(testSuiteName, testSuiteIdentifierMapping.getOrDefault(testSuiteIdentifier, null)));
     }
 
     public Set<String> getAllTestsInPath(Path parent) {
-        return Stream.concat(
-                        testSuiteNameMapping
-                                .entrySet()
-                                .stream(),
-                        testSuiteIdentifierMapping
-                                .entrySet()
-                                .stream()
-                )
+        Stream<Map.Entry<String, Path>> stream;
+        if (useFullIdentifier) {
+            stream = testSuiteIdentifierMapping
+                    .entrySet()
+                    .stream();
+        } else {
+            stream = Stream.concat(
+                    testSuiteNameMapping
+                            .entrySet()
+                            .stream(),
+                    testSuiteIdentifierMapping
+                            .entrySet()
+                            .stream()
+            );
+        }
+        return stream
                 .filter(entry -> entry.getValue().toAbsolutePath().startsWith(parent))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
