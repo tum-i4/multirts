@@ -50,7 +50,7 @@ public class JavaSourceCodeParser {
 
     public static String getFullyQualifiedTypeName(Path path) throws IOException {
         JavaSourceFile file = new JavaSourceFile(IOUtils.readFromFile(path), path);
-        return file.getPackage() + "." + file.getPrimaryTypeName();
+        return file.getFullPrimaryType();
     }
 
     public static String getPrimaryTypeName(Path path) {
@@ -64,7 +64,7 @@ public class JavaSourceCodeParser {
         final static Pattern packagePattern = Pattern.compile(packageRegex, Pattern.MULTILINE);
         final String code;
         final Path path;
-        private String packageName = "";
+        private String packageName;
         private String primaryTypeName = "";
 
         JavaSourceFile(String code) {
@@ -77,12 +77,12 @@ public class JavaSourceCodeParser {
         }
 
         String getPackage() {
-            if (packageName.isEmpty()) {
+            if (packageName == null) {
                 final Matcher matcher = packagePattern.matcher(code);
                 if (matcher.find() && matcher.groupCount() >= 1) {
                     packageName = matcher.group(1);
                 } else {
-                    throw new RuntimeException("Invalid Java source file without valid package found: " + (path != null ? this.path : this.code));
+                    packageName = "";
                 }
             }
             return packageName;
@@ -93,7 +93,7 @@ public class JavaSourceCodeParser {
             final Set<String> names = CollectionUtils.newSet();
             while (matcher.find()) {
                 for (int i = 1; i <= matcher.groupCount(); i++) {
-                    names.add(getPackage() + "." + matcher.group(i)); // TODO replace . with / ?
+                    names.add(getPackage().isEmpty() ? matcher.group(i) : getPackage() + "." + matcher.group(i)); // FIXME: maybe replace '.' with '/' ?
                 }
             }
             return names;
@@ -102,7 +102,7 @@ public class JavaSourceCodeParser {
         String getPrimaryTypeName() {
             if (primaryTypeName.isEmpty()) {
                 if (path != null) {
-                    primaryTypeName = path.getFileName().toString().split("\\.java")[0]; // TODO
+                    primaryTypeName = path.getFileName().toString().split("\\.java")[0]; // FIXME: better solution?
                 } else {
                     final Matcher matcher = typePattern.matcher(code);
                     if (matcher.find() && matcher.groupCount() >= 1) {
@@ -113,6 +113,10 @@ public class JavaSourceCodeParser {
                 }
             }
             return primaryTypeName;
+        }
+
+        public String getFullPrimaryType() {
+            return getPackage().isEmpty() ? getPrimaryTypeName() : getPackage() + "." + getPrimaryTypeName();
         }
     }
 }
