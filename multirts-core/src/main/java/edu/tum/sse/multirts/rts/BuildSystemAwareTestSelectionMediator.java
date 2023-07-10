@@ -11,7 +11,6 @@ import org.apache.maven.project.MavenProject;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static edu.tum.sse.multirts.modules.MavenProjectLocationCache.POM_XML;
 import static edu.tum.sse.multirts.modules.MavenProjectLocationCache.findParentPOM;
@@ -47,8 +46,8 @@ public class BuildSystemAwareTestSelectionMediator {
                 if (PathUtils.hasFilename(item.getPath(), POM_XML)) {
                     modifiedMavenProjectDirs.add(repositoryRoot.resolve(item.getPath().getParent()).toAbsolutePath());
                 } else if (PathUtils.hasAnyExtension(item.getPath(), COMPILE_TIME_EXTENSIONS)) {
-                    Path parentPOM = findParentPOM(item.getPath().getParent());
-                    modifiedMavenProjectDirs.add(repositoryRoot.resolve(parentPOM.getParent()).toAbsolutePath());
+                    Optional<Path> parentPOM = findParentPOM(item.getPath().getParent());
+                    parentPOM.ifPresent(path -> modifiedMavenProjectDirs.add(repositoryRoot.resolve(path.getParent()).toAbsolutePath()));
                 }
             }
         }
@@ -76,8 +75,8 @@ public class BuildSystemAwareTestSelectionMediator {
         for (SelectedTestSuite testSuite : selectedTestSuites) {
             Optional<Path> testFile = getTestSuiteMapping().getFile(testSuite.getTestSuite().getTestId());
             if (testFile.isPresent()) {
-                Path testSuiteParentPOM = findParentPOM(testFile.get().getParent());
-                mavenModules.add(mavenRoot.relativize(testSuiteParentPOM).toString());
+                Optional<Path> testSuiteParentPOM = findParentPOM(testFile.get().getParent());
+                testSuiteParentPOM.ifPresent(path -> mavenModules.add(mavenRoot.relativize(path).toString()));
             }
         }
         return mavenModules;

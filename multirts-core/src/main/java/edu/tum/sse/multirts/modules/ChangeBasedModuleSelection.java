@@ -9,6 +9,7 @@ import org.apache.maven.project.MavenProject;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static edu.tum.sse.multirts.modules.MavenProjectLocationCache.POM_XML;
@@ -60,8 +61,8 @@ public class ChangeBasedModuleSelection {
             if (filePath.startsWith(mavenRootProject.getBasedir().toPath().toAbsolutePath()) && (
                     PathUtils.hasFilename(filePath, POM_XML) || PathUtils.hasAnyExtension(filePath, RELEVANT_FILE_EXTENSIONS))
             ) {
-                Path parentPOM = findParentPOM(filePath.getParent()).toAbsolutePath();
-                selectedModules.add(mavenRootProject.getBasedir().toPath().relativize(parentPOM).toString());
+                Optional<Path> parentPOM = findParentPOM(filePath.getParent());
+                parentPOM.ifPresent(path -> selectedModules.add(mavenRootProject.getBasedir().toPath().relativize(path.toAbsolutePath()).toString()));
             }
         }
         return selectedModules;
