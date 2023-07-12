@@ -4,13 +4,15 @@ import edu.tum.sse.jtec.util.IOUtils;
 import edu.tum.sse.multirts.util.CollectionUtils;
 
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 /**
@@ -23,12 +25,9 @@ public class JavaSourceCodeParser {
     public static String TEST_FILE_PATTERN = "(Test.*|.*Test|TestCase.*|.*TestCase|.*Tests).java";
 
     public static Set<Path> findAllJavaTestFiles(Path root) throws IOException {
-        try (Stream<Path> paths = Files.find(root,
-                Integer.MAX_VALUE,
-                (path, basicFileAttributes) -> basicFileAttributes.isRegularFile() && isTestFile(path)
-        )) {
-            return paths.collect(Collectors.toSet());
-        }
+        Set<Path> testFiles = new HashSet<>();
+        Files.walkFileTree(root, new JavaTestFileWalker(testFiles));
+        return testFiles;
     }
 
     public static boolean isJavaFile(final Path path) {
@@ -55,6 +54,44 @@ public class JavaSourceCodeParser {
 
     public static String getPrimaryTypeName(Path path) {
         return path.getFileName().toString().split("\\.java")[0];
+    }
+
+    static class JavaTestFileWalker implements FileVisitor<Path> {
+        private final Set<Path> testFiles;
+
+        public JavaTestFileWalker(Set<Path> testFiles) {
+            this.testFiles = testFiles;
+        }
+
+        @Override
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            if (isJavaFile(file) && attrs.isRegularFile() && isTestFile(file)) {
+                testFiles.add(file);
+            }
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+            if (exc != null) {
+                exc.printStackTrace();
+                testFiles.remove(file);
+            }
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+            if (exc != null) {
+                exc.printStackTrace();
+            }
+            return FileVisitResult.CONTINUE;
+        }
     }
 
     static class JavaSourceFile {

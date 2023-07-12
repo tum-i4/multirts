@@ -98,7 +98,7 @@ class JavaSourceCodeParserTest {
         Set<Path> paths = JavaSourceCodeParser.findAllJavaTestFiles(tempDir);
 
         // then
-        assertEquals(paths.size(), 2);
+        assertEquals(2, paths.size());
         assertTrue(paths.containsAll(newSet(tempDir.resolve("a/TestA.java"), tempDir.resolve("b/BTest.java"))));
     }
 }
